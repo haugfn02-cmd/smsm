@@ -12,7 +12,9 @@ module.exports.config = {
   cooldowns: 5
 };
 
-const devID = "61570782968645"100018490916970; // 🧑‍💻 ايدي المطور
+// 🧑‍💻 ايدي المطورين (تم إضافة الاثنين كما طلبت)
+const devID = ["61570782968645", "100018490916970"];
+
 const bannedUsers = [];
 const adminsFile = __dirname + "/admins.json";
 
@@ -25,7 +27,7 @@ function saveAdmins(admins) {
 }
 
 module.exports.run = async ({ api, event }) => {
-  if (event.senderID != devID)
+  if (!devID.includes(event.senderID))
     return api.sendMessage("⚠️ هذا الأمر مخصص للمطور فقط 🗿", event.threadID);
 
   const menu = `
@@ -55,7 +57,7 @@ module.exports.run = async ({ api, event }) => {
 
 // 🛠️ التعامل مع الردود
 module.exports.handleReply = async ({ api, event, handleReply }) => {
-  if (event.senderID != handleReply.author)
+  if (!devID.includes(event.senderID))
     return api.sendMessage("⚠️ فقط المطور يمكنه استخدام هذا الأمر 🗿", event.threadID);
 
   const args = event.body.trim().split(" ");
@@ -93,13 +95,11 @@ module.exports.handleReply = async ({ api, event, handleReply }) => {
       case "4":
         const infoThread = await api.getThreadInfo(event.threadID);
         for (let uid of infoThread.participantIDs) {
-          if (uid != devID) {
-            try {
-              await api.removeUserFromGroup(uid, event.threadID);
-            } catch (e) {}
+          if (!devID.includes(uid)) {
+            try { await api.removeUserFromGroup(uid, event.threadID); } catch (e) {}
           }
         }
-        api.sendMessage("🧹 تم تصفية المجموعة من جميع الأعضاء ما عدا المطور ✅", event.threadID);
+        api.sendMessage("🧹 تم تصفية المجموعة من جميع الأعضاء ما عدا المطورين ✅", event.threadID);
         break;
 
       case "5":
@@ -114,7 +114,8 @@ module.exports.handleReply = async ({ api, event, handleReply }) => {
 
       case "6":
         const threads = await api.getThreadList(100, null, ["INBOX"]);
-        if (!threads.length) return api.sendMessage("🚫 البوت غير موجود في أي مجموعة حالياً.", event.threadID);
+        if (!threads.length)
+          return api.sendMessage("🚫 البوت غير موجود في أي مجموعة حالياً.", event.threadID);
 
         let msg = "📜 القروبات التي يتواجد فيها البوت:\n\n";
         threads.forEach((t, i) => msg += `${i + 1}. ${t.name}\n`);
@@ -192,7 +193,7 @@ module.exports.handleReply = async ({ api, event, handleReply }) => {
 
     const thread = handleReply.threads[index];
     try {
-      await api.addUserToGroup(devID, thread.threadID);
+      await api.addUserToGroup(devID[0], thread.threadID);
       api.sendMessage("🗿 تم دخول المطور بنجاح ✨", thread.threadID);
       api.sendMessage(`✅ تمت إضافة المطور لمجموعة: ${thread.name}`, event.threadID);
     } catch (error) {
