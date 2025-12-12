@@ -42,7 +42,7 @@ module.exports = function ({ api, models, Users, Threads, Currencies }) {
       } else if (matchedPrefix) {
         const closestMatch = checker.bestMatch.target;
         api.sendMessage(`الامر دا مش موجود، انت قاصد '${closestMatch}'؟`, threadID, async (err, info) => {
-          return; // لا يظهر أن البوت قرأ الرسائل
+          return; // لا يظهر أن البوت قرأ رسائل الأعضاء
         });
         return;
       }
@@ -116,8 +116,7 @@ module.exports = function ({ api, models, Users, Threads, Currencies }) {
     if (command.config.hasPermssion > permssion) {
       return api.sendMessage(
         global.getText("handleCommand", "permssionNotEnough", command.config.name),
-        event.threadID,
-        event.messageID
+        event.threadID
       );
     }
 
@@ -127,7 +126,7 @@ module.exports = function ({ api, models, Users, Threads, Currencies }) {
     const timestamps = client.cooldowns.get(command.config.name);
     const expirationTime = (command.config.cooldowns || 1) * 1000;
     if (timestamps.has(senderID) && dateNow < timestamps.get(senderID) + expirationTime) {
-      return; // تم إزالة setMessageReaction لمنع ظهور الـ Seen
+      return; // لا يوجد reaction → لا يظهر القراءة
     }
 
     var getText2;
