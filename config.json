@@ -1,0 +1,74 @@
+{
+    "INFO": "📌 المطور الوحيد للبوت: 61570782968645",
+    "language": "vi",
+    "DeveloperMode": false,
+    "autoCreateDB": true,
+    "iconUnsend": {
+        "status": true,
+        "icon": "🪙"
+    },
+    "notiGroup": false,
+    "NOTIFICATION": true,
+    "YASSIN": false,
+    "allowInbox": true,
+    "commandDisabled": [],
+    "eventDisabled": [],
+    "BOTNAME": "سمسم",
+    "AMDIN_NAME": "كولو",
+    "FACEBOOK_ADMIN": "https://www.facebook.com/61570782968645",
+    "PREFIX": "/",
+    "ADMINBOT": [
+        "61570782968645"
+    ],
+    "NDH": [
+        "61570782968645"
+    ],
+    "DATABASE": {
+        "sqlite": {
+            "storage": "data.sqlite"
+        }
+    },
+    "APPSTATEPATH": "appstate.json",
+    "FCAOption": {
+        "forceLogin": true,
+        "listenEvents": true,
+        "pauseLog": true,
+        "logLevel": "error",
+        "selfListen": false,
+        "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Mobile/15E148 Safari/604.1"
+    },
+    "version": "1.2.14",
+    "cave": {
+        "cooldownTime": 100000
+    },
+    "daily": {
+        "cooldownTime": 540000,
+        "rewardCoin": 500
+    },
+    "بنك": {
+        "APIKEY": "chinhdz"
+    },
+    "تاريخ": {
+        "cooldownTime": 200000000
+    },
+    "الرانك": {
+        "autoUnsend": true,
+        "unsendMessageAfter": 5
+    },
+    "كهف": {
+        "cooldown": 2000000000
+    },
+    "لقب": {
+        "APIKEY": "mi451266190"
+    },
+    "طقس": {
+        "OPEN_WEATHER": "c4ef85b93982d6627681b056e24bd438"
+    },
+    "اوامر": {
+        "autoUnsend": true,
+        "delayUnsend": 20
+    },
+    "log": {
+        "enable": true
+    }
+}
