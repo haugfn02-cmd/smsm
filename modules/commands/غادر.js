@@ -1,6 +1,6 @@
 // ⚙️ أمر مغادرة احترافي - خاص بالمطور ⚙️
 const approvedEmoji = '👍';
-const developerID = "61570782968645";
+const developerID = "61581906898524";
 
 module.exports.config = {
   name: "مغادرة",
