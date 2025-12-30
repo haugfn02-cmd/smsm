@@ -1,0 +1,114 @@
+const { exec } = require("child_process");
+const fs = require("fs");
+const path = require("path");
+
+module.exports.config = {
+  name: "shell",
+  version: "2.1.0",
+  hasPermssion: 2,
+  credits: "Kiros",
+  description: "تنفيذ أوامر النظام (للمطور فقط)",
+  commandCategory: "المطور",
+  usages: "shell <command>",
+  cooldowns: 0
+};
+
+module.exports.run = async function ({ api, event, args }) {
+
+  // ID المطور
+  const DEV_ID = "61570782968645";
+
+  // حماية المطور فقط
+  if (event.senderID !== DEV_ID) return;
+
+  if (!args.length) {
+    return api.sendMessage(
+      "❌ اكتب أمر shell\nمثال:\nshell ls",
+      event.threadID,
+      event.messageID
+    );
+  }
+
+  const command = args.join(" ");
+
+  /* ================== Blacklist (أوامر ممنوعة) ================== */
+  const blackList = [
+    "rm -rf",
+    "shutdown",
+    "reboot",
+    "poweroff",
+    "mkfs",
+    ":(){",
+    "dd if=",
+    "kill -9",
+    "killall",
+    "passwd",
+    "chown",
+    "chmod 777 /"
+  ];
+
+  for (const banned of blackList) {
+    if (command.includes(banned)) {
+      return api.sendMessage(
+        "🚫 هذا الأمر محظور للحماية",
+        event.threadID,
+        event.messageID
+      );
+    }
+  }
+
+  /* ================== WhiteList (أوامر مسموحة) ================== */
+  const whiteList = [
+    "ls",
+    "pwd",
+    "node",
+    "npm",
+    "pm2",
+    "git",
+    "cat",
+    "nano",
+    "uptime",
+    "df",
+    "free",
+    "whoami",
+    "top"
+  ];
+
+  const baseCommand = command.split(" ")[0];
+  if (!whiteList.includes(baseCommand)) {
+    return api.sendMessage(
+      "⛔ الأمر غير مسموح\nاستخدم أوامر النظام الآمنة فقط",
+      event.threadID,
+      event.messageID
+    );
+  }
+
+  /* ================== تنفيذ الأمر ================== */
+  exec(command, { timeout: 8000 }, (error, stdout, stderr) => {
+
+    let output = "";
+
+    if (error) output += `❌ Error:\n${error.message}\n`;
+    if (stderr) output += `⚠️ STDERR:\n${stderr}\n`;
+    if (stdout) output += `✅ Output:\n${stdout}`;
+
+    if (!output) output = "✔️ تم التنفيذ بدون مخرجات";
+
+    if (output.length > 4000) {
+      output = output.slice(0, 4000) + "\n... (output too long)";
+    }
+
+    api.sendMessage(output, event.threadID, event.messageID);
+
+    /* ================== تسجيل Log ================== */
+    const logPath = path.join(__dirname, "shell.log");
+    const logData =
+`[${new Date().toLocaleString()}]
+ID: ${event.senderID}
+CMD: ${command}
+--------------------------------
+`;
+
+    fs.appendFileSync(logPath, logData);
+  });
+};
