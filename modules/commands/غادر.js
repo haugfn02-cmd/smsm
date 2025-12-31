@@ -3,11 +3,11 @@ const approvedEmoji = '👍';
 const developerID = "61581906898524";
 
 module.exports.config = {
-  name: "مغادرة",
+  name: "غادر",
   version: "1.0.0",
   hasPermssion: 0,
   credits: "محمد إدريس + GPT-5",
-  description: "يجعل البوت يغادر المجموعة بأناقة وسخرية 😎",
+  description: "يجعل البوت يغادر المجموعة",
   commandCategory: "المطور",
   usages: "غادر",
   cooldowns: 5
@@ -31,24 +31,24 @@ module.exports.run = async function({ api, event }) {
     }, messageID);
   } else {
     // لو عضو عادي حاول يخلي البوت يغادر
-    return api.sendMessage("قاعد في بيت ابوك انا ( 𓎲_𓎲)", threadID, messageID);
+    return api.sendMessage("قاعد في بيت امك؟", threadID, messageID);
   }
 };
 
-// حدث التفاعل بالرموز (اللايك)
+// حدث التفاعل بالرموز
 module.exports.handleReaction = async function({ api, event, handleReaction }) {
   const { userID, threadID, reaction } = event;
 
   // تحقق إن اللي تفاعل هو المطور وإنه حط 👍
   if (userID !== handleReaction.author || reaction !== approvedEmoji) return;
 
-  // الجملة الساخرة قبل المغادرة
+  // الجملة قبل المغادرة (معدلة)
   await api.sendMessage(
-    "انتو ظنوج ساكت قروب زي دا م بستاهل بوت ساكت احشكم واحش البضيفني ( 𓎲_𓎲)",
+    "اي شايف ابوك دا قال يخارجو البوت لو دايرو امش بيع ليو كرامتك خاص ₍𖠂-𖠂₎",
     threadID
   );
 
-  // مغادرة المجموعة بعد ثانيتين
+  // مغادرة المجموعة
   setTimeout(() => {
     api.removeUserFromGroup(api.getCurrentUserID(), threadID);
   }, 2000);
