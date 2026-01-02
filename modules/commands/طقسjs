@@ -1,0 +1,65 @@
+const axios = require("axios");
+
+module.exports.config = {
+  name: "طقس",
+  version: "1.1.0",
+  hasPermssion: 0,
+  credits: "Anas",
+  description: "معرفة حالة الطقس في مدينتك",
+  commandCategory: "خدمات",
+  usages: "[اسم المدينة]",
+  cooldowns: 5
+};
+
+module.exports.run = async ({ api, event, args }) => {
+  const { threadID, messageID } = event;
+  const city = args.join(" ");
+
+  // إذا لم يكتب المستخدم اسم مدينة، يعرض له تعليمات الاستخدام
+  if (!city) {
+    return api.sendMessage(
+      "📖 **طريقة استخدام أمر الطقس:**\n" +
+      "━━━━━━━━━━━━━━━━━━\n" +
+      "يرجى كتابة اسم المدينة بعد الأمر.\n" +
+      "📍 مثال: `طقس بغداد`\n" +
+      "📍 مثال: `طقس مكة المكرمة`\n" +
+      "📍 مثال: `طقس Cairo`\n" +
+      "━━━━━━━━━━━━━━━━━━", 
+      threadID, messageID
+    );
+  }
+
+  api.setMessageReaction("🌡️", messageID, () => {}, true);
+
+  try {
+    // جلب البيانات من API الطقس العالمي
+    const res = await axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=06074320b332306d3d4b47a9ec5a1097&units=metric&lang=ar`);
+    
+    const data = res.data;
+    const temp = Math.round(data.main.temp); // تقريب درجة الحرارة
+    const feelsLike = Math.round(data.main.feels_like);
+    const desc = data.weather[0].description;
+    const humidity = data.main.humidity;
+    const wind = data.wind.speed;
+    const country = data.sys.country;
+    const cityName = data.name;
+
+    const weatherMsg = 
+      `🌤️ | حالة الطقس لمدينة: ${cityName} (${country})\n` +
+      `━━━━━━━━━━━━━━━━━━\n` +
+      `🌡️ درجة الحرارة: ${temp}°C\n` +
+      `🤔 الشعور الحقيقي: ${feelsLike}°C\n` +
+      `☁️ الوصف: ${desc}\n` +
+      `💧 الرطوبة: ${humidity}%\n` +
+      `💨 سرعة الرياح: ${wind} م/ث\n` +
+      `━━━━━━━━━━━━━━━━━━\n` +
+      `📍 الوقت الحالي في ${cityName}: ${new Date().toLocaleTimeString('ar-EG', {timeZone: 'UTC', hour: '2-digit', minute:'2-digit'})}`;
+
+    api.setMessageReaction("✅", messageID, () => {}, true);
+    return api.sendMessage(weatherMsg, threadID, messageID);
+
+  } catch (e) {
+    api.setMessageReaction("❌", messageID, () => {}, true);
+    return api.sendMessage(`❌ عذراً، لم أتمكن من العثور على مدينة "${city}". تأكد من كتابة الاسم بشكل صحيح.`, threadID, messageID);
+  }
+};
