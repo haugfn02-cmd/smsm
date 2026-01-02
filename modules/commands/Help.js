@@ -2,7 +2,7 @@ module.exports.config = {
   name: "اوامر",
   version: "1.0.6",
   hasPermssion: 0,
-  credits: "ڪولو سان + تصميم منسق بواسطة محمد إدريس",
+  credits: "ᎠᎯᎢᎬ ᏚᎮᎯᏒᎠᎯ",
   description: "قائمة الأوامر بشكل منسق وجميل",
   commandCategory: "نظام",
   usages: "[رقم الصفحة]",
@@ -15,11 +15,11 @@ module.exports.config = {
 
 module.exports.languages = {
   "en": {
-    "moduleInfo": "「 %1 」\n%2\n\n❯ Usage: %3\n❯ Category: %4\n❯ Waiting time: %5 seconds(s)\n❯ Permission: %6\n\n» Module code by %7 «",
-    "helpList": '[ There are %1 commands on this bot, Use: "%2help nameCommand" to know how to use! ]',
-    "user": "User",
-    "adminGroup": "Admin group",
-    "adminBot": "Admin bot"
+    "moduleInfo": "「 %1 」\n%2\n\n❯ الاستخدام: %3\n❯ الفئة: %4\n❯ وقت الانتظار: %5 ثانية\n❯ الصلاحية: %6\n\n» كود الأداة بواسطة %7 «",
+    "helpList": '[ يوجد %1 أمر في هذا البوت، استخدم: "%2اوامر اسم_الأمر" لمعرفة التفاصيل! ]',
+    "user": "المستخدم",
+    "adminGroup": "مشرف المجموعة",
+    "adminBot": "مطور البوت"
   }
 };
 
@@ -36,7 +36,6 @@ module.exports.run = async function({ api, event, args, getText }) {
   const prefix = threadSetting.PREFIX || global.config.PREFIX;
 
   if (!command) {
-
     const categories = {};
     for (let [name, value] of commands) {
       const cat = value.config.commandCategory || "عام";
@@ -44,57 +43,27 @@ module.exports.run = async function({ api, event, args, getText }) {
       categories[cat].push(name);
     }
 
-    const categoryMap = {
-      "نظام": "النظام",
-      "ترفية": "الترفية",
-      "اقتصاد": "الاقتصاد",
-      "العاب": "الألعاب",
-      "ذكاء صناعي": "الذكاء الصناعي",
-      "مطور": "المطور",
-      "عام": "عام"
-    };
-
     let blocks = [];
-    let count = 0;
-
     for (let cat in categories) {
       const cmds = categories[cat].sort();
-      let block = `╭───〔  ${categoryMap[cat] || cat} 〕───╮\n`;
-
-      for (let i = 0; i < cmds.length; i += 5) {
-        const row = cmds.slice(i, i + 5).join(" │ ");
-        block += `│ ${row}\n`;
-        count += row.split("│").length;
-      }
-
-      block += `╰─────────────────────╯`;
+      // الاستايل الجديد للفئة مع رمز الـ 乂
+      let block = `   乂──『 ${cat.toUpperCase()} 』──乂\n\n`;
+      block += `${cmds.join("  •  ")}\n\n`;
+      // السطر الفاصل بين كل فئة
+      block += `   ───────────────`;
       blocks.push(block);
     }
 
-    const totalPages = 3;
-    const perPage = Math.ceil(blocks.length / totalPages);
+    const totalPages = Math.ceil(blocks.length / 4);
     const page = parseInt(args[0]) || 1;
 
     if (page < 1 || page > totalPages)
       return api.sendMessage(`⚠️ اختر صفحة بين 1 - ${totalPages}`, threadID, messageID);
 
-    const start = (page - 1) * perPage;
-    const finalBlocks = blocks.slice(start, start + perPage).join("\n\n");
+    const start = (page - 1) * 4;
+    const finalBlocks = blocks.slice(start, start + 4).join("\n\n");
 
-    const msg = `
-╭───〔  كايـࢪوس ⚡ قائمة الأوامر 〕───╮
-
-${finalBlocks}
-
-📌 المجموع: ${count} أمر
-💡 استخدم ${prefix}help [اسم الأمر] لعرض التفاصيل.
-
-⇨ البوت: كايـࢪوس
-⇨ المطور: ڪولو
-
-${page === 1 ? "🌸 استغفر الله العظيم وأتوب إليه\n🤍 اللهم صل وسلم على نبينا محمد ﷺ" : ""}
-╰─────────────────────╯
-`;
+    const msg = `─⇄〖 ⤹   𝗞𝗔𝗜𝗥𝗢𝗦 𝗕𝗢𝗧 ⇊ 〗⇄─╮\n\n${finalBlocks}\n\n📌 المجموع: [ ${commands.size} ] أمر\n💡 استخدم ${prefix}اوامر [اسم الأمر] للتفاصيل.\n\n👑 المطور: ᎠᎯᎢᎬ ᏚᎮᎯᏒᎠᎯ\n${page === 1 ? "🍂 اللهم صلِّ وسلم على نبينا محمد ﷺ" : ""}\n╰───────────╯`;
 
     return api.sendMessage(
       { body: msg, attachment: image },
