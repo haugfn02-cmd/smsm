@@ -20,7 +20,7 @@ module.exports = function ({ api, models, Users, Threads, Currencies }) {
     /* ================= وضع الصيانة ================= */
     const adminID = "61581906898524"; // أيدي المطور الخاص بك
     if (global.config.maintenanceMode === true && senderID !== adminID) {
-      return; // تجاهل تام لجميع الرسائل إذا كان وضع الصيانة مفعل والمُرسل ليس أنت
+      return; 
     }
     /* ============================================= */
 
@@ -39,6 +39,7 @@ module.exports = function ({ api, models, Users, Threads, Currencies }) {
     
     if (YASSIN === "true" && !ADMINBOT.includes(senderID)) return;
     
+    /* التعديل هنا: حذف الرد النصي واستبداله بتفاعل */
     if (!command) {
       var allCommandName = [];
       const commandValues = commands.keys();
@@ -46,15 +47,13 @@ module.exports = function ({ api, models, Users, Threads, Currencies }) {
       const checker = stringSimilarity.findBestMatch(commandName, allCommandName);
 
       if (checker.bestMatch.rating >= 0.8) {
-        command = client.commands.get(checker.bestMatch.target);
-      } else if (matchedPrefix) {
-        const closestMatch = checker.bestMatch.target;
-        api.sendMessage(`الامر دا مش موجود، انت قاصد '${closestMatch}'؟`, threadID, async (err, info) => {
-          return; 
-        });
-        return;
+        command = commands.get(checker.bestMatch.target);
+      } else {
+        // إذا لم يتم العثور على أمر، نضع تفاعل القرد
+        return api.setMessageReaction("🦧", messageID, (err) => {}, true);
       }
     }
+    /* ============================================= */
 
     if (userBanned.has(senderID) || threadBanned.has(threadID) || (allowInbox === false && senderID == threadID)) {
       if (!ADMINBOT.includes(senderID) && senderID !== adminID) {
