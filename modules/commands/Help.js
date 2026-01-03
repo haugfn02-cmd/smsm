@@ -1,9 +1,9 @@
 module.exports.config = {
   name: "اوامر",
-  version: "1.0.6",
+  version: "1.0.7",
   hasPermssion: 0,
   credits: "ᎠᎯᎢᎬ ᏚᎮᎯᏒᎠᎯ",
-  description: "قائمة الأوامر بشكل منسق وجميل",
+  description: "قائمة الأوامر بشكل منسق وجميل مع إخفاء أوامر المطور",
   commandCategory: "نظام",
   usages: "[رقم الصفحة]",
   cooldowns: 5,
@@ -24,7 +24,6 @@ module.exports.languages = {
 };
 
 module.exports.run = async function({ api, event, args, getText }) {
-  const fs = require("fs");
   const axios = require("axios");
   const { commands } = global.client;
   const { threadID, messageID } = event;
@@ -37,19 +36,23 @@ module.exports.run = async function({ api, event, args, getText }) {
 
   if (!command) {
     const categories = {};
+    let visibleCommandsCount = 0;
+
+    // تصفية الأوامر وإخفاء أوامر المطور (التي تحمل صلاحية 2)
     for (let [name, value] of commands) {
-      const cat = value.config.commandCategory || "عام";
-      if (!categories[cat]) categories[cat] = [];
-      categories[cat].push(name);
+      if (value.config.hasPermssion !== 2) { 
+        const cat = value.config.commandCategory || "عام";
+        if (!categories[cat]) categories[cat] = [];
+        categories[cat].push(name);
+        visibleCommandsCount++;
+      }
     }
 
     let blocks = [];
     for (let cat in categories) {
       const cmds = categories[cat].sort();
-      // الاستايل الجديد للفئة مع رمز الـ 乂
       let block = `   乂──『 ${cat.toUpperCase()} 』──乂\n\n`;
       block += `${cmds.join("  •  ")}\n\n`;
-      // السطر الفاصل بين كل فئة
       block += `   ───────────────`;
       blocks.push(block);
     }
@@ -63,7 +66,7 @@ module.exports.run = async function({ api, event, args, getText }) {
     const start = (page - 1) * 4;
     const finalBlocks = blocks.slice(start, start + 4).join("\n\n");
 
-    const msg = `─⇄〖 ⤹   𝗞𝗔𝗜𝗥𝗢𝗦 𝗕𝗢𝗧 ⇊ 〗⇄─╮\n\n${finalBlocks}\n\n📌 المجموع: [ ${commands.size} ] أمر\n💡 استخدم ${prefix}اوامر [اسم الأمر] للتفاصيل.\n\n👑 المطور: ᎠᎯᎢᎬ ᏚᎮᎯᏒᎠᎯ\n${page === 1 ? "🍂 اللهم صلِّ وسلم على نبينا محمد ﷺ" : ""}\n╰───────────╯`;
+    const msg = `─⇄〖 ⤹   𝗞𝗔𝗜𝗥𝗢𝗦 𝗕𝗢𝗧 ⇊ 〗⇄─╮\n\n${finalBlocks}\n\n📌 المجموع: [ ${visibleCommandsCount} ] أمر\n💡 استخدم ${prefix}اوامر [اسم الأمر]\n📖 الصفحة: [ ${page} / ${totalPages} ]\n\n👑 المطور: ᎠᎯᎢᎬ ᏚᎮᎯᏒᎠᎯ\n${page === 1 ? "🍂 اللهم صلِّ وسلم على نبينا محمد ﷺ" : ""}\n╰───────────╯`;
 
     return api.sendMessage(
       { body: msg, attachment: image },
