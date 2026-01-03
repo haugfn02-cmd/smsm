@@ -1,114 +1,119 @@
-// ⚙️ مشرف.js - نظام إدارة المشرفين (Config)
 const fs = require("fs");
 
-// 🟢 ملف config بدل admins.json
-const configPath = __dirname + "/config.json";
+// 🟢 مسار ملف الإعدادات
+const configPath = "./config.json";
 
-// 🟢 إنشاء config لو غير موجود
+// 🟢 التأكد من وجود ملف الإعدادات وهيكلة البيانات
 if (!fs.existsSync(configPath)) {
-    fs.writeFileSync(configPath, JSON.stringify({
-        admins: []
-    }, null, 2));
+    fs.writeFileSync(configPath, JSON.stringify({ admins: [] }, null, 2));
 }
 
-// 🟢 قراءة config
 function getConfig() {
     return JSON.parse(fs.readFileSync(configPath, "utf8"));
 }
 
-// 🟢 حفظ config
 function saveConfig(data) {
     fs.writeFileSync(configPath, JSON.stringify(data, null, 2));
 }
 
 module.exports.config = {
     name: "مشرف",
-    version: "3.1.0",
+    version: "3.5.0",
     hasPermssion: 2,
     credits: "محمد إدريس + GPT-5",
-    description: "إدارة المشرفين (حفظ في config)",
+    description: "إدارة مشرفي البوت المسجلين في config.json",
     commandCategory: "المطور",
-    usages: "add/remove/list/help",
+    usages: "[add/remove/list/clear/check]",
+    cooldowns: 2
 };
 
-// 🎨 استايل خفيف
+// 🎨 تنسيق الرسائل (الاستايل الرفيع)
 function style(msg) {
-    return `— 👑 المشرفين —
-${msg}
-— — — — — —`;
+    return `┌──  🛡️ نـظـام الـمـشـرفـيـن  ──┐\n\n${msg}\n\n└───────────────┘`;
 }
 
 module.exports.run = async ({ api, event, args }) => {
-    const devID = "61581906898524";
+    const devID = "61581906898524"; 
     const config = getConfig();
-    const admins = config.admins || [];
+    if (!config.admins) config.admins = [];
+    const admins = config.admins;
 
-    // 🛡️ السماح للمطور فقط
+    // 🛡️ التحقق من صلاحية المطور فقط
     if (event.senderID != devID)
-        return api.sendMessage("❌ الأمر للمطور فقط.", event.threadID);
+        return api.sendMessage("⚠️ عذراً، هذا الأمر مخصص لمطور البوت الأساسي فقط.", event.threadID);
 
-    const cmd = args[0]?.toLowerCase() || "help";
+    const cmd = args[0]?.toLowerCase();
 
-    // ➕ إضافة مشرف
+    // 1️⃣ إضافة مشرف (add)
     if (cmd === "add") {
-        if (!event.messageReply)
-            return api.sendMessage(style("↩️ رد على الشخص لرفعه مشرف."), event.threadID);
-
-        const uid = event.messageReply.senderID;
-
-        if (admins.includes(uid))
-            return api.sendMessage(style("⚠️ العضو مشرف مسبقًا."), event.threadID);
-
-        admins.push(uid);
-        saveConfig(config);
-
-        return api.sendMessage(
-            style(`✅ تمت الإضافة\n🆔 ${uid}`),
-            event.threadID
-        );
-    }
-
-    // 📋 عرض المشرفين
-    if (cmd === "list" || cmd === "slait") {
-        if (admins.length === 0)
-            return api.sendMessage(style("ℹ️ لا يوجد مشرفين."), event.threadID);
-
-        let txt = "📋 المشرفين:\n\n";
-        for (let i in admins) {
-            let id = admins[i];
-            let info = await api.getUserInfo(id);
-            let name = info[id]?.name || "غير معروف";
-            txt += `${Number(i) + 1}) ${name}\n🆔 ${id}\n\n`;
+        let uid;
+        if (event.messageReply) {
+            uid = event.messageReply.senderID;
+        } else if (Object.keys(event.mentions).length > 0) {
+            uid = Object.keys(event.mentions)[0];
+        } else if (args[1]) {
+            uid = args[1];
+        } else {
+            return api.sendMessage(style("ℹ️ يرجى الرد على رسالة الشخص أو منشنته لإضافته كـمشرف."), event.threadID);
         }
 
-        return api.sendMessage(style(txt), event.threadID);
-    }
-
-    // ➖ إزالة مشرف
-    if (cmd === "remove") {
-        if (!args[1])
-            return api.sendMessage(style("✏️ اكتب رقم المشرف."), event.threadID);
-
-        const index = parseInt(args[1]) - 1;
-
-        if (isNaN(index) || index < 0 || index >= admins.length)
-            return api.sendMessage(style("❌ رقم غير صحيح."), event.threadID);
-
-        const removed = admins.splice(index, 1)[0];
+        if (admins.includes(uid)) return api.sendMessage(style("⚠️ هذا المستخدم موجود بالفعل في قائمة المشرفين."), event.threadID);
+        
+        admins.push(uid);
         saveConfig(config);
-
-        return api.sendMessage(
-            style(`🗑️ تمت الإزالة\n🆔 ${removed}`),
-            event.threadID
-        );
+        return api.sendMessage(style(`✅ تم منح الصلاحيات بنجاح!\n👤 الآيدي: ${uid}\n🛡️ الحالة: مشرف مسجل`), event.threadID);
     }
 
-    // ❓ help
+    // 2️⃣ عرض القائمة (list)
+    if (cmd === "list" || cmd === "قائمة") {
+        if (admins.length === 0) return api.sendMessage(style("ℹ️ قائمة المشرفين فارغة حالياً."), event.threadID);
+
+        let msg = "📋 قـائـمـة الـمُـشـرفـيـن:\n\n";
+        for (let i = 0; i < admins.length; i++) {
+            const id = admins[i];
+            try {
+                const info = await api.getUserInfo(id);
+                const name = info[id].name;
+                msg += ` ├ ${i + 1}. ${name}\n └ 🆔 ${id}\n\n`;
+            } catch (e) {
+                msg += ` ├ ${i + 1}. مستخدم غير معروف\n └ 🆔 ${id}\n\n`;
+            }
+        }
+        return api.sendMessage(style(msg), event.threadID);
+    }
+
+    // 3️⃣ إزالة مشرف (remove)
+    if (cmd === "remove" || cmd === "حذف") {
+        const index = parseInt(args[1]) - 1;
+        if (isNaN(index) || index < 0 || index >= admins.length)
+            return api.sendMessage(style("❌ يرجى إدخال رقم ترتيب المشرف الصحيح.\nمثال: مشرف حذف 1"), event.threadID);
+
+        const removedID = admins.splice(index, 1)[0];
+        saveConfig(config);
+        return api.sendMessage(style(`🗑️ تم سحب الصلاحيات من:\n🆔 ${removedID}`), event.threadID);
+    }
+
+    // 4️⃣ مسح الكل (clear)
+    if (cmd === "clear") {
+        config.admins = [];
+        saveConfig(config);
+        return api.sendMessage(style("🧹 تم مسح جميع المشرفين من القائمة بنجاح."), event.threadID);
+    }
+
+    // 5️⃣ فحص مشرف (check)
+    if (cmd === "check") {
+        let uid = event.messageReply ? event.messageReply.senderID : event.senderID;
+        const isAdm = admins.includes(uid);
+        return api.sendMessage(style(isAdm ? `🌟 المستخدم [${uid}] مشرف.` : `❌ المستخدم [${uid}] ليس مشرفاً.`), event.threadID);
+    }
+
+    // ❓ قائمة المساعدة
     return api.sendMessage(style(
-        "📌 الأوامر:\n\n" +
-        "• مشرف add (رد)\n" +
-        "• مشرف list\n" +
-        "• مشرف remove رقم\n" +
-        "• مشرف help"
+        "📝 الـأوامـر الـمُـتـاحـة:\n" +
+        "• مشرف add ⤫ (رد/منشن)\n" +
+        "• مشرف list ⤫ عرض القائمة\n" +
+        "• مشرف remove ⤫ (الرقم)\n" +
+        "• مشرف check ⤫ فحص الصلاحية\n" +
+        "• مشرف clear ⤫ مسح القائمة"
     ), event.threadID);
 };
