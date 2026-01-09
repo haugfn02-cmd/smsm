@@ -1,11 +1,11 @@
 module.exports.config = {
   name: "اوامر",
-  version: "7.5.0",
+  version: "7.6.0",
   hasPermssion: 0,
   credits: "ᎠᎯᎢᎬ ᏚᎮᎯᏒᎠᎯ",
-  description: "قائمة الأوامر النسخة الاحترافية",
+  description: "قائمة الأوامر مقسمة على 3 صفحات",
   commandCategory: "نظام",
-  usages: "[اسم الأمر/رقم الصفحة]",
+  usages: "[رقم الصفحة]",
   cooldowns: 5
 };
 
@@ -37,19 +37,17 @@ module.exports.run = async function({ api, event, args, getText }) {
       categories[cat].push(name);
     }
 
-    // دمج الفئات التي تحتوي على أقل من 3 أوامر في فئة "أخرى"
+    // دمج الفئات الصغيرة
     const mergedCategories = {};
     const smallCategories = [];
     for (let cat in categories) {
-      if (categories[cat].length < 3 && cat !== "عام") {
+      if (categories[cat].length < 2 && cat !== "عام") {
         smallCategories.push(...categories[cat]);
       } else {
         mergedCategories[cat] = categories[cat];
       }
     }
-    if (smallCategories.length > 0) {
-      mergedCategories["أخرى"] = (mergedCategories["أخرى"] || []).concat(smallCategories);
-    }
+    if (smallCategories.length > 0) mergedCategories["أخرى"] = (mergedCategories["أخرى"] || []).concat(smallCategories);
 
     let sections = [];
     for (let cat in mergedCategories) {
@@ -59,9 +57,10 @@ module.exports.run = async function({ api, event, args, getText }) {
       sections.push(section);
     }
 
-    // تقسيم الصفحات إلى 3 أقسام كما طلبت
-    const itemsPerPage = 3; 
-    const totalPages = Math.ceil(sections.length / itemsPerPage);
+    // إجبار النظام على 3 صفحات فقط
+    const totalPages = 3;
+    const itemsPerPage = Math.ceil(sections.length / totalPages);
+    
     let page = parseInt(args[0]) || 1;
     if (page < 1 || page > totalPages) page = 1;
 
@@ -92,21 +91,9 @@ ${displaySections}
     }
   }
 
+  // كود تفاصيل الأمر يبقى كما هو
   return api.sendMessage(
-    getText(
-      "moduleInfo",
-      command.config.name,
-      command.config.description,
-      `${prefix}${command.config.name} ${(command.config.usages) ? command.config.usages : ""}`,
-      command.config.commandCategory,
-      command.config.cooldowns,
-      (command.config.hasPermssion == 0)
-        ? getText("user")
-        : (command.config.hasPermssion == 1)
-        ? getText("adminGroup")
-        : getText("adminBot"),
-      command.config.credits
-    ),
+    getText("moduleInfo", command.config.name, command.config.description, `${prefix}${command.config.name} ${(command.config.usages) ? command.config.usages : ""}`, command.config.commandCategory, command.config.cooldowns, (command.config.hasPermssion == 0) ? getText("user") : (command.config.hasPermssion == 1) ? getText("adminGroup") : getText("adminBot"), command.config.credits),
     threadID,
     messageID
   );
