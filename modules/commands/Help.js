@@ -1,11 +1,11 @@
 module.exports.config = {
   name: "اوامر",
-  version: "1.1.2",
+  version: "7.0.0",
   hasPermssion: 0,
   credits: "ᎠᎯᎢᎬ ᏚᎮᎯᏒᎠᎯ",
-  description: "عرض قائمة الأوامر بخطوط رفيعة وأنيقة",
+  description: "قائمة الأوامر النسخة السابعة المتقدمة",
   commandCategory: "نظام",
-  usages: "[رقم الصفحة]",
+  usages: "[اسم الأمر/رقم الصفحة]",
   cooldowns: 5,
   envConfig: {
     autoUnsend: false,
@@ -15,70 +15,73 @@ module.exports.config = {
 
 module.exports.languages = {
   "en": {
-    "moduleInfo": "─ التفاصيل ─\n\n- الاسم: %1\n- الوصف: %2\n- الاستخدام: %3\n- الفئة: %4\n- الانتظار: %5 ثانية\n- الصلاحية: %6\n\n» بواسطة: %7",
-    "user": "المستخدم",
-    "adminGroup": "مشرف المجموعة",
-    "adminBot": "مطور البوت"
+    "moduleInfo": "╭─────── ✧ ───────╮\n  📜 𝖣𝖤𝖳𝖠𝖨𝖫𝖲 𝖢𝖮𝖬𝖬𝖠𝖭𝖣\n╰─────── ✧ ───────╯\n\n❒ 𝖭𝖺𝗆𝖾: %1\n❒ 𝖣𝖾𝗌𝖼: %2\n❒ 𝖴𝗌𝖺𝖦𝖾: %3\n❒ 𝖢𝖺𝗍𝖾𝗀𝗈𝗋𝗒: %4\n❒ 𝖢𝗈𝗈𝗅𝖽𝗈𝗐𝗇: %5𝗌\n❒ 𝖯𝖾𝗋𝗆𝗂𝗌𝗌𝗂𝗈𝗇: %6\n\n» 𝖢𝗋𝖾𝖽𝗂𝗍𝗌: %7",
+    "user": "𝖴𝗌𝖾𝗋",
+    "adminGroup": "𝖠𝖽𝗆𝗂𝗇 𝖦𝗋𝗈𝗎𝗉",
+    "adminBot": "𝖠𝖽𝗆𝗂𝗇 𝖡𝗈𝗍"
   }
 };
 
 module.exports.run = async function({ api, event, args, getText }) {
+  const fs = require("fs");
   const axios = require("axios");
   const { commands } = global.client;
   const { threadID, messageID } = event;
 
-  const imgURL = "https://i.ibb.co/Vcsqzf4T/22ed4e077eadba33e9b9f78a64317ab9.jpg";
-  const image = (await axios.get(imgURL, { responseType: "stream" })).data;
-
+  const imageUrl = "https://i.ibb.co/Vcsqzf4T/22ed4e077eadba33e9b9f78a64317ab9.jpg";
   const command = commands.get((args[0] || "").toLowerCase());
   const threadSetting = global.data.threadData.get(parseInt(threadID)) || {};
   const prefix = threadSetting.PREFIX || global.config.PREFIX;
 
   if (!command) {
-    let categories = {};
-    const hiddenCategories = ["المطور", "المالك", "developer", "config", "owner"];
-
+    const categories = {};
     for (let [name, value] of commands) {
-      let cat = value.config.commandCategory || "عام";
-      if (hiddenCategories.includes(cat.toLowerCase())) continue;
-      
+      if (value.config.hasPermssion == 2 || value.config.commandCategory?.toLowerCase() === "مطور") continue;
+      const cat = value.config.commandCategory || "General";
       if (!categories[cat]) categories[cat] = [];
       categories[cat].push(name);
     }
 
-    const finalCategories = { "إضافات": [] };
+    let sections = [];
     for (let cat in categories) {
-      if (categories[cat].length < 3 && cat !== "نظام") {
-        finalCategories["إضافات"].push(...categories[cat]);
-      } else {
-        finalCategories[cat] = categories[cat];
-      }
-    }
-    if (finalCategories["إضافات"].length === 0) delete finalCategories["إضافات"];
-
-    let blocks = [];
-    for (let cat in finalCategories) {
-      const cmds = finalCategories[cat].sort();
-      // استايل الخطوط الرفيعة
-      let block = `┌── ${cat.toUpperCase()} ──┐\n`;
-      block += `│ ${cmds.join(", ")}\n`;
-      block += `└──────────────┘`;
-      blocks.push(block);
+      const cmds = categories[cat].sort();
+      // استايل الفئات بخطوط رقيقة ناعمة
+      let section = `   乂──『 𝖢𝖠𝖳𝖤𝖦𝖮𝖱𝖸: ${cat.toUpperCase()} 』──乂\n`;
+      section += `  ╰┈➤ ${cmds.join("  •  ")}\n`;
+      sections.push(section);
     }
 
-    const totalPages = 3;
-    const itemsPerPage = Math.ceil(blocks.length / totalPages);
-    const page = parseInt(args[0]) || 1;
-
-    if (page < 1 || page > totalPages)
-      return api.sendMessage(`⚠️ القائمة متوفرة في ${totalPages} صفحات فقط.`, threadID, messageID);
+    const itemsPerPage = 5; 
+    const totalPages = Math.ceil(sections.length / itemsPerPage);
+    let page = parseInt(args[0]) || 1;
+    if (page < 1 || page > totalPages) page = 1;
 
     const start = (page - 1) * itemsPerPage;
-    const finalBlocks = blocks.slice(start, start + itemsPerPage).join("\n\n");
+    const displaySections = sections.slice(start, start + itemsPerPage).join("\n");
 
-    const msg = `─── KAIROS SYSTEM ───\n\n${finalBlocks}\n\n┈ ┈ ┈ ┈ ┈ ┈ ┈ ┈ ┈ ┈ ┈\n▫️ الأوامر: ${commands.size}\n▫️ الصفحة: ${page} / ${totalPages}\n▫️ المطور: ᎠᎯᎢᎬ ᏚᎮᎯᏒᎠᎯ\n\n💡 ${prefix}اوامر [اسم الأمر]\n✨ صلِّ على محمد ﷺ\n─────────────────`;
+    const msg = 
+`╭─────── ✦ ───────╮
+    𝖪𝖠𝖨𝖱𝖮𝖲 𝖲𝖸𝖲𝖳𝖤𝖬 𝖵𝟩
+╰─────── ✦ ───────╯
 
-    return api.sendMessage({ body: msg, attachment: image }, threadID);
+${displaySections}
+
+━━━━━━━━━━━━━━━━━━━
+❒ 𝖳𝗈𝗍𝖺𝗅 𝖢𝗆𝖽𝗌: [ ${commands.size} ]
+❒ 𝖯𝖺𝗀𝖾: [ ${page} / ${totalPages} ]
+❒ 𝖯𝗋𝖾𝖿𝗂𝗮: [ ${prefix} ]
+━━━━━━━━━━━━━━━━━━━
+💡 𝖡𝗈𝗍: ڪايࢪوس 👑
+👑 𝖣𝖾𝗏: ᎠᎯᏁᎢᎬᏚᎮᎯᏒᎠᎯ
+✨ اللهم صلِّ وسلم على سيدنا محمد 🍂
+━━━━━━━━━━━━━━━━━━━`;
+
+    try {
+      const image = (await axios.get(imageUrl, { responseType: "stream" })).data;
+      return api.sendMessage({ body: msg, attachment: image }, threadID);
+    } catch (e) {
+      return api.sendMessage(msg, threadID);
+    }
   }
 
   return api.sendMessage(
@@ -89,7 +92,11 @@ module.exports.run = async function({ api, event, args, getText }) {
       `${prefix}${command.config.name} ${(command.config.usages) ? command.config.usages : ""}`,
       command.config.commandCategory,
       command.config.cooldowns,
-      (command.config.hasPermssion == 0) ? getText("user") : (command.config.hasPermssion == 1) ? getText("adminGroup") : getText("adminBot"),
+      (command.config.hasPermssion == 0)
+        ? getText("user")
+        : (command.config.hasPermssion == 1)
+        ? getText("adminGroup")
+        : getText("adminBot"),
       command.config.credits
     ),
     threadID,
