@@ -1,57 +1,50 @@
-// ملف: المطور.js
-module.exports.config = {
-  name: "المطور",
-  version: "1.0.8",
-  hasPermssion: 0,
-  credits: "كــولـو",
-  description: "عرض معلومات المطور والبوت",
-  commandCategory: "نظام",
-  usages: "مطور",
-  cooldowns: 5,
+/**
+ * @تحسين وتطوير: ᎠᎯᏁᎢᎬᏚᎮᎯᏒᎠᎯ
+ * @النسخة: V7.0.0 [ULTRA]
+ * @الوصف: كود عرض معلومات المطور والبوت بتنسيق فخم
+ */
+
+export const config = {
+    name: "المطور",
+    version: "7.0.0",
+    hasPermssion: 0,
+    credits: "ᎠᎯᏁᎢᎬᏚᎮᎯᏒᎠᎯ",
+    description: "عرض معلومات مطور نظام ڪايࢪوس",
+    commandCategory: "النظام",
+    usages: "",
+    cooldowns: 5
 };
 
-module.exports.run = async function ({ api, event }) {
-  const fs = require("fs");
-  const axios = require("axios");
-  const path = require("path");
+export async function run({ api, event, Currencies }) {
+    const { threadID, messageID } = event;
 
-  try {
-    // جلب قائمة المجموعات
-    const threads = await api.getThreadList(100, null, ["inbox", "other"]);
-    const groupCount = threads.filter(thread => thread.isGroup).length;
+    // إعداد الرسالة بتنسيق الخطوط الرفيعة الذي اخترته
+    const infoMessage = 
+`  ┈ ┈ ┈ ┈ ┈ ┈ ┈ ┈ ┈ ┈ ┈ ┈ ┈ ┈ ┈ ┈ 
+         ✧ ڪايࢪوس | KYROS ✧
+  ┈ ┈ ┈ ┈ ┈ ┈ ┈ ┈ ┈ ┈ ┈ ┈ ┈ ┈ ┈ ┈ 
 
-    const msgText = `
-❀━━━━━━━〔 ✦ 〕━━━━━━━❀
+   𓏲 نـظـام الـتـشـغـيـل
+   ⊹ الإصـدار: V7.0.0 [ULTRA]
+   ⊹ الـبـريـفـكـس: /
+   ⊹ الـخـوادم: نشط في المجموعات
 
-👨‍💻 معلومات المطور:
-- اسم المطور: كــولـو
-- رابط المطور: https://www.facebook.com/share/1712u8LzjE/
+   𓏲 الـعـقـل الـمـدبـر
+   ⊹ الـمـصـمم: ᎠᎯᏁᎢᎬᏚᎮᎯᏒᎠᎯ
+   ⊹ الـعـمـر: 17 عاماً
+   ⊹ الـمـكـانـة: الـقـائـد الأعلى
 
-══════════ ❍ ══════════
+   𓏲 الـتـواصـل الـرسـمـي
+   ⊹ انـسـتـقـرام:
+   https://www.instagram.com/ymmkwlw
+   ⊹ فـيـسـبـوك:
+   https://www.facebook.com/share/14RPMU8p7D7/
 
-📌 معلومات البوت:
-- اسم البوت: كـايࢪوس
-- الإصدار: 3.2.7
-- عدد المجموعات: ${groupCount}
+  — — — — — — — — — — — — — — — — 
+    『 ڪايࢪوس: الـسـيـادة الـمـطـلـقـة 』`;
 
-❀━━━━━━━〔 ✦ 〕━━━━━━━❀
-`;
-
-    // تحميل الصورة مؤقتًا
-    const imageUrl = "https://i.ibb.co/nMtJz0q8/0dfd43fae004e551aa8046f1b1ac818b.jpg";
-    const imagePath = path.join(__dirname, "bot_image.jpg");
-    const response = await axios({ url: imageUrl, responseType: "arraybuffer" });
-    fs.writeFileSync(imagePath, Buffer.from(response.data, "utf-8"));
-
-    // إرسال الرسالة مع الصورة
-    await api.sendMessage(
-      { body: msgText, attachment: fs.createReadStream(imagePath) },
-      event.threadID,
-      () => fs.unlinkSync(imagePath) // حذف الصورة بعد الإرسال
-    );
-
-  } catch (error) {
-    console.log(error);
-    return api.sendMessage("❌ حدث خطأ أثناء جلب المعلومات.", event.threadID);
-  }
-};
+    // إرسال الرسالة مع صورة المطور إذا أردت (يمكنك وضع رابط صورتك هنا)
+    return api.sendMessage({
+        body: infoMessage,
+    }, threadID, messageID);
+}
