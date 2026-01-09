@@ -1,54 +1,54 @@
 const fs = require("fs-extra");
-const path = __dirname + "/../commands/cache/settings.json";
+const path = __dirname + "/../commands/cache/groups.json";
 
 module.exports.config = {
   name: "antiChange",
-  eventType: ["log:subscribe", "log:unsubscribe", "log:thread-name", "log:thread-icon", "log:user-nickname"],
-  version: "1.0.0",
+  eventType: ["log:thread-name", "log:thread-icon", "log:user-nickname", "log:unsubscribe"],
+  version: "2.0.0",
   credits: "Gemini",
-  description: "منع التغييرات وحماية المجموعة"
+  description: "منع التغييرات وإعادة الإعدادات الأصلية"
 };
 
 module.exports.run = async function ({ api, event }) {
   const { threadID, logMessageType, logMessageData, author } = event;
+  const botID = api.getCurrentUserID();
+
+  // إذا كان المغير هو البوت نفسه، تجاهل الأمر
+  if (author == botID) return;
+
   if (!fs.existsSync(path)) return;
-  
   let data = JSON.parse(fs.readFileSync(path));
   const s = data[threadID];
   if (!s) return;
 
-  const botID = api.getCurrentUserID();
-
-  // 1. حماية الاسم
+  // 1. حماية اسم المجموعة
   if (logMessageType === "log:thread-name" && s.nameProtect) {
-    if (author == botID) return;
-    api.setTitle(s.originalName, threadID, () => {
-      api.sendMessage("⚠️ التغيير غير مسموح به! تمت إعادة الاسم الأصلي.", threadID);
+    api.setTitle(s.originalName, threadID, (err) => {
+      if (!err) api.sendMessage("⚠️ التغيير غير مسموح به! تمت إعادة اسم المجموعة.", threadID);
     });
   }
 
-  // 2. مكافحة الخروج
-  if (logMessageType === "log:unsubscribe" && s.antiOut) {
-    const leftID = logMessageData.leftParticipantFbId;
-    if (leftID == botID) return;
-    api.addUserToGroup(leftID, threadID, (err) => {
-      if (!err) api.sendMessage("⚠️ مكافحة الخروج مفعلة، تمت إعادة العضو.", threadID);
-    });
-  }
-
-  // 3. مكافحة الكنيات
+  // 2. حماية الكنيات (حذف الكنية الجديدة)
   if (logMessageType === "log:user-nickname" && s.nicknameProtect) {
-    if (author == botID) return;
+    // إرجاع الكنية القديمة أو حذف الكنية الحالية
     const oldNickname = logMessageData.oldNickname || "";
-    api.changeNickname(oldNickname, threadID, logMessageData.participantFbId, () => {
-      api.sendMessage("⚠️ التغيير غير مسموح به! تمت إعادة الكنية الأصلية.", threadID);
+    api.changeNickname(oldNickname, threadID, logMessageData.participantFbId, (err) => {
+      if (!err) api.sendMessage("⚠️ التغيير غير مسموح به! تم حذف/إعادة الكنية.", threadID);
     });
   }
 
-  // 4. مكافحة الصورة
+  // 3. حماية الصورة
   if (logMessageType === "log:thread-icon" && s.imageProtect) {
-    if (author == botID) return;
-    api.sendMessage("⚠️ التغيير غير مسموح به! (مكافحة تغيير الصورة مفعلة).", threadID);
-    // ملاحظة: استعادة الصورة تتطلب رفع ملف جديد، حالياً يكتفي بالتحذير
+     api.sendMessage("⚠️ تغيير صورة المجموعة غير مسموح به!", threadID);
+     // ملاحظة: استعادة الصورة تتطلب صلاحيات كاملة ورفع ملف، فيسبوك يصعب استعادتها تلقائياً برابط.
+  }
+
+  // 4. مكافحة الخروج
+  if (logMessageType === "log:unsubscribe" && s.antiOut) {
+    if (logMessageData.leftParticipantFbId != botID) {
+      api.addUserToGroup(logMessageData.leftParticipantFbId, threadID, (err) => {
+        if (!err) api.sendMessage("⚠️ مكافحة الخروج مفعلة، تم إعادة العضو.", threadID);
+      });
+    }
   }
 };
