@@ -1,84 +1,69 @@
-const fs = require("fs");
+const fs = require("fs-extra");
 const path = require("path");
 
-// 📂 ملف حفظ حالة التفعيل
-const dataPath = path.join(__dirname, "antilink.json");
-
-if (!fs.existsSync(dataPath)) fs.writeFileSync(dataPath, "{}");
-
-function loadData() {
-  return JSON.parse(fs.readFileSync(dataPath));
-}
-
-function saveData(data) {
-  fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
-}
+const dataPath = __dirname + "/cache/antilink.json";
 
 module.exports.config = {
   name: "antilink",
-  version: "1.0",
+  version: "2.0",
   hasPermssion: 1,
-  credits: "محمد إدريس",
-  description: "منع الروابط مع تحذير وطرد تلقائي",
+  credits: "ᎠᎯᎢᎬ ᏚᎮᎯᏒᎠᎯ",
+  description: "منع الروابط مع حذف فوري وطرد العضو",
   commandCategory: "الحماية",
-  usages: "antilink [on/off]",
+  usages: "on/off",
   cooldowns: 3,
 };
 
 module.exports.run = async function({ api, event, args }) {
-  const data = loadData();
-  const threadID = event.threadID;
+  if (!fs.existsSync(dataPath)) fs.writeJsonSync(dataPath, {});
+  const data = fs.readJsonSync(dataPath);
+  const { threadID } = event;
 
-  if (!args[0]) return api.sendMessage("استخدم: antilink on/off", threadID);
-
-  if (args[0].toLowerCase() === "on") {
+  if (args[0] == "on") {
     data[threadID] = true;
-    saveData(data);
-    return api.sendMessage("🚫 نظام منع الروابط مفعل.", threadID);
-  } else if (args[0].toLowerCase() === "off") {
-    delete data[threadID];
-    saveData(data);
-    return api.sendMessage("✅ نظام منع الروابط متوقف.", threadID);
-  } else {
-    return api.sendMessage("استخدم: antilink on أو off فقط.", threadID);
+    fs.writeJsonSync(dataPath, data);
+    return api.sendMessage("🚫 تم تفعيل نظام مكافحة الروابط (الجغم مفعل).", threadID);
+  } 
+  if (args[0] == "off") {
+    data[threadID] = false;
+    fs.writeJsonSync(dataPath, data);
+    return api.sendMessage("✅ تم إيقاف نظام مكافحة الروابط.", threadID);
   }
+  return api.sendMessage("استخدم: antilink on أو off", threadID);
 };
 
-module.exports.handleEvent = async function({ api, event, Threads, Users }) {
-  if (event.type !== "message" || !event.body) return;
-  const data = loadData();
-  const threadID = event.threadID;
-  const senderID = event.senderID;
-  const body = event.body;
+module.exports.handleEvent = async function({ api, event }) {
+  const { threadID, senderID, body, messageID } = event;
+  if (!body) return;
 
-  // 🔒 تحقق من التفعيل
+  if (!fs.existsSync(dataPath)) return;
+  const data = fs.readJsonSync(dataPath);
   if (!data[threadID]) return;
 
-  // 🧩 تحقق من وجود رابط
-  const linkRegex = /(https?:\/\/|www\.)/i;
-  if (!linkRegex.test(body)) return;
+  const linkRegex = /(https?:\/\/|www\.|facebook\.com|me\.me)/i;
 
-  // 🛡️ تجاهل الأدمن والمطور
-  const threadInfo = await api.getThreadInfo(threadID);
-  const admins = threadInfo.adminIDs.map(a => a.id);
-  const developerID = "61570782968645"; // ضع آي دي المطور هنا
+  if (linkRegex.test(body)) {
+    // 🛡️ استثناء الأدمن والمطور
+    const threadInfo = await api.getThreadInfo(threadID);
+    const admins = threadInfo.adminIDs.map(a => a.id);
+    const developerID = "61570782968645"; 
 
-  if (admins.includes(senderID) || senderID === developerID) return;
+    if (admins.includes(senderID) || senderID == developerID || senderID == api.getCurrentUserID()) return;
 
-  // 🚫 تفاعل وإنذار
-  try {
-    await api.setMessageReaction("🚫", event.messageID, () => {}, true);
-  } catch {}
-  await api.sendMessage("احذف (⌣̀_𓁹҂)‏", threadID, event.messageID);
+    // 1. حذف الرسالة فوراً
+    try {
+      api.unsendMessage(messageID);
+    } catch (e) {}
 
-  // ⏳ انتظار 5 ثواني
-  await new Promise(r => setTimeout(r, 5000));
+    // 2. إرسال تحذير نهائي
+    api.sendMessage(`يمنع نشر الروابط! جاري جغم العضو.. (⌣̀_𓁹)`, threadID);
 
-  // 📥 فحص هل الرسالة ما زالت موجودة
-  try {
-    await api.removeUserFromGroup(senderID, threadID);
-    api.sendMessage("تم الجغم بنجاح (⌣̀_𓁹)", threadID);
-  } catch (e) {
-    api.sendMessage("ما قدرت أطرد العضو، تأكد إن البوت أدمن (⌣̀_𓁹)", threadID);
+    // 3. الطرد الفعلي
+    setTimeout(() => {
+      api.removeUserFromGroup(senderID, threadID, (err) => {
+        if (err) return api.sendMessage("ما قدرت أطرد العضو، تأكد إن البوت أدمن (⌣̀_𓁹)", threadID);
+        return api.sendMessage("تم الجغم بنجاح، طار العضو (⌣̀_𓁹)", threadID);
+      });
+    }, 2000); // طرد بعد ثانيتين من الحذف
   }
 };
