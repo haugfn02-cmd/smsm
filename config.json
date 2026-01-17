@@ -1,5 +1,5 @@
 {
-    "language": "vi",
+    "language": "en",
     "DeveloperMode": false,
     "autoCreateDB": true,
     "iconUnsend": {
@@ -51,24 +51,24 @@
     "log": {
         "enable": true
     },
-    "cave": {
-        "cooldownTime": 100000
+    "sing": {
+        "YOUTUBE_API": "AIzaSyDdzsxzYZAoBCxF-TXQyVhd52_Tslu-FXU",
+        "SOUNDCLOUD_API": "M4TSyS6eV0AcMynXkA3qQASGcOFQTWub"
     },
-    "daily": {
-        "cooldownTime": 540000,
-        "rewardCoin": 500
+    "tiktok": {
+        "API_KEY": "mzkFree_XNPP4LYOG9H8VY83GHG"
+    },
+    "video": {
+        "YOUTUBE_API": "AIzaSyAE4wH3OSfPUjJZTJvByQfXhEuaBMXjzAA"
+    },
+    "fbcover": {
+        "APIKEY": "tdunguwu"
     },
     "math": {
         "WOLFRAM": "T8J8YV-H265UQ762K"
     },
-    "minecraft": {
-        "APIKEY": ""
-    },
     "randomname": {
         "APIKEY": "mi451266190"
-    },
-    "subnau": {
-        "APIKEY": ""
     },
     "tikinfo": {
         "apikey": "fOeckmtu"
@@ -81,9 +81,6 @@
     },
     "spam": {
         "spamDelay": 2
-    },
-    "subnautica": {
-        "APIKEY": ""
     },
     "adminOnly": false,
     "اوامر": {
