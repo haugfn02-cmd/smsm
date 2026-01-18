@@ -1,10 +1,10 @@
 {
-    "language": "en",
-    "DeveloperMode": false,
+    "language": "vi",
+    "DeveloperMode": true,
     "autoCreateDB": true,
     "iconUnsend": {
         "status": true,
-        "icon": "⌛"
+        "icon": "🪙"
     },
     "notiGroup": false,
     "NOTIFICATION": true,
@@ -12,15 +12,15 @@
     "allowInbox": true,
     "commandDisabled": [],
     "eventDisabled": [],
-    "BOTNAME": "『⇄ 𝑩𝑶𝑻 ⇃≛⇂ 𝑲𝑰𝑹𝑶𝑺』 ",
-    "AMDIN_NAME": "𝐁𝐎𝐓",
-    "FACEBOOK_ADMIN": "https://www.facebook.com/DoraYogiEXE",
+    "BOTNAME": "『≛ 『⇄ 𝑩𝑶𝑻 ⇃≛⇂ 𝑲𝑰𝑹𝑶𝑺츄  』",
+    "AMDIN_NAME": "انجالاتي",
+    "FACEBOOK_ADMIN": "61581906898524",
     "PREFIX": "/",
     "ADMINBOT": [
         "61581906898524"
     ],
     "NDH": [
-        ""
+        "61581906898524"
     ],
     "DATABASE": {
         "sqlite": {
@@ -34,65 +34,20 @@
         "pauseLog": true,
         "logLevel": "error",
         "selfListen": false,
+        "autoMarkRead": false,
+        "autoMarkDelivery": false,
         "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Mobile/15E148 Safari/604.1"
     },
     "version": "1.2.14",
-    "menu": {
-        "autoUnsend": {
-            "status": true,
-            "timeOut": 60
-        },
-        "sendAttachments": {
-            "status": true,
-            "random": true,
-            "url": "./media/fblite_video.mp4"
-        }
+    "cave": {
+        "cooldownTime": 100000
     },
-    "log": {
-        "enable": true
-    },
-    "sing": {
-        "YOUTUBE_API": "AIzaSyDdzsxzYZAoBCxF-TXQyVhd52_Tslu-FXU",
-        "SOUNDCLOUD_API": "M4TSyS6eV0AcMynXkA3qQASGcOFQTWub"
-    },
-    "tiktok": {
-        "API_KEY": "mzkFree_XNPP4LYOG9H8VY83GHG"
-    },
-    "video": {
-        "YOUTUBE_API": "AIzaSyAE4wH3OSfPUjJZTJvByQfXhEuaBMXjzAA"
-    },
-    "fbcover": {
-        "APIKEY": "tdunguwu"
-    },
-    "math": {
-        "WOLFRAM": "T8J8YV-H265UQ762K"
-    },
-    "randomname": {
-        "APIKEY": "mi451266190"
-    },
-    "tikinfo": {
-        "apikey": "fOeckmtu"
-    },
-    "xidach": {
-        "maxPlayers": 5,
-        "normalWinBonus": 1,
-        "superWinBonus": 2,
-        "epicWinBonus": 4
-    },
-    "spam": {
-        "spamDelay": 2
-    },
-    "adminOnly": false,
-    "اوامر": {
-        "autoUnsend": true,
-        "delayUnsend": 20
+    "daily": {
+        "cooldownTime": 540000,
+        "rewardCoin": 500
     },
     "بنك": {
         "APIKEY": "chinhdz"
-    },
-    "هلب": {
-        "autoUnsend": true,
-        "delayUnsend": 300
     },
     "تاريخ": {
         "cooldownTime": 200000000
@@ -109,5 +64,12 @@
     },
     "طقس": {
         "OPEN_WEATHER": "c4ef85b93982d6627681b056e24bd438"
+    },
+    "اوامر": {
+        "autoUnsend": true,
+        "delayUnsend": 20
+    },
+    "log": {
+        "enable": true
     }
 }
