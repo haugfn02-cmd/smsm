@@ -1,114 +1,96 @@
 const fs = require("fs-extra");
-const axios = require("axios");
-const path = __dirname + "/cache/groups.json";
-const imagePath = __dirname + "/cache/group_images/";
+const path = __dirname + "/cache/protection_settings.json";
 
 module.exports.config = {
-  name: "اعدادات",
-  version: "4.1.0",
-  hasPermssion: 1, 
-  credits: "Gemini",
-  description: "ضبط حماية المجموعة وحفظ البيانات الأصلية",
-  commandCategory: "الإدارة",
-  usages: "اعدادات",
-  cooldowns: 5
+    name: "اعدادات",
+    version: "4.5.0",
+    hasPermssion: 1,
+    credits: "Gemini",
+    description: "نظام حماية المجموعات المطور - نسخة نهائية",
+    commandCategory: "إدارة المجموعة",
+    usages: "اعدادات",
+    cooldowns: 5
 };
 
-module.exports.run = async function ({ api, event }) {
-  const { threadID, messageID, senderID } = event;
-
-  try {
-    const threadInfo = await api.getThreadInfo(threadID);
-    // التأكد أن المستخدم أدمن
-    if (!threadInfo.adminIDs.some(admin => admin.id == senderID)) {
-        return api.sendMessage("❌ هذا الأمر مخصص لمسؤولي المجموعة فقط.", threadID, messageID);
-    }
-
-    // إنشاء المجلدات إذا لم تكن موجودة
+module.exports.run = async ({ api, event }) => {
+    const { threadID, messageID } = event;
     if (!fs.existsSync(__dirname + "/cache")) fs.mkdirSync(__dirname + "/cache");
-    if (!fs.existsSync(imagePath)) fs.mkdirSync(imagePath);
-    if (!fs.existsSync(path)) fs.writeFileSync(path, JSON.stringify({}));
+    if (!fs.existsSync(path)) fs.writeJsonSync(path, {});
     
-    let data = JSON.parse(fs.readFileSync(path));
-
+    let data = fs.readJsonSync(path);
     if (!data[threadID]) {
-      data[threadID] = {
-        antiSpam: false, antiOut: false, nameProtect: false,
-        imageProtect: false, nicknameProtect: false, antiJoin: false,
-        originalName: threadInfo.threadName || "",
-        imageLocalPath: ""
-      };
-      fs.writeFileSync(path, JSON.stringify(data, null, 2));
+        data[threadID] = { 
+            antispam: false, antileave: false, antiname: false, 
+            antibox: false, antinickname: false, notify: false,
+            snapshot: { name: "", nicknames: {} } 
+        };
     }
 
     const s = data[threadID];
-    const status = (val) => val ? "✅" : "❌";
+    const check = (status) => status ? "✅" : "❌";
 
-    const msg = `╭─────────────╮\n     ⌈ إعـدادات الـحـمـايـة ⌋\n╰─────────────╯\n\n` +
-      `1. [${status(s.antiSpam)}] مكافحة الإزعاج\n` +
-      `2. [${status(s.antiOut)}] منع الخروج\n` +
-      `3. [${status(s.nameProtect)}] حماية اسم المجموعة\n` +
-      `4. [${status(s.imageProtect)}] حماية صورة المجموعة\n` +
-      `5. [${status(s.nicknameProtect)}] حماية الألقاب\n` +
-      `6. [${status(s.antiJoin)}] منع الانضمام\n\n` +
-      `☚ رد برقم الإعداد لتغييره\n☚ تفاعل بـ 👍 لحفظ البيانات الحالية كمرجع (الاسم والصورة).`;
+    const msg = `⌈ اعـدادات الـمـجـموعـة ⌋\n
+1. [${check(s.antispam)}] مكافحة الازعاج
+2. [${check(s.antileave)}] مكافحة الخروج
+3. [${check(s.antiname)}] مكافحة تغيير الاسم
+4. [${check(s.antibox)}] مكافحة تغيير الصورة
+5. [${check(s.antinickname)}] مكافحة تغيير الكنية\n
+6. [${check(s.notify)}] اخطار احداث المجموعة\n
+⇒ رد بأرقام الخيارات لتغييرها (مثال: 1 3 5)`;
 
     return api.sendMessage(msg, threadID, (err, info) => {
-      global.client.handleReply.push({ name: this.config.name, messageID: info.messageID, author: senderID });
+        global.client.handleReply.push({
+            name: this.config.name,
+            messageID: info.messageID,
+            author: event.senderID,
+            settings: s
+        });
     }, messageID);
-  } catch (e) { console.log(e) }
 };
 
-module.exports.handleReply = async function ({ api, event, handleReply }) {
-  const { threadID, body, senderID, messageID } = event;
-  if (senderID != handleReply.author) return;
+module.exports.handleReply = async ({ api, event, handleReply }) => {
+    if (event.senderID != handleReply.author) return;
+    const choices = event.body.split(/\s+/);
+    let settings = handleReply.settings;
+    const map = { "1": "antispam", "2": "antileave", "3": "antiname", "4": "antibox", "5": "antinickname", "6": "notify" };
 
-  const choices = body.match(/\d+/g);
-  if (!choices) return;
+    choices.forEach(num => { if (map[num]) settings[map[num]] = !settings[map[num]]; });
 
-  let data = JSON.parse(fs.readFileSync(path));
-  choices.forEach(num => {
-    const keys = ["", "antiSpam", "antiOut", "nameProtect", "imageProtect", "nicknameProtect", "antiJoin"];
-    if (keys[num]) data[threadID][keys[num]] = !data[threadID][keys[num]];
-  });
-
-  fs.writeFileSync(path, JSON.stringify(data, null, 2));
-  const s = data[threadID];
-  const status = (val) => val ? "✅" : "❌";
-  
-  const updatedMsg = `⌈ تـحـديـث الإعـدادات ⌋\n\n1. [${status(s.antiSpam)}] مكافحة الإزعاج\n2. [${status(s.antiOut)}] منع الخروج\n3. [${status(s.nameProtect)}] حماية الاسم\n4. [${status(s.imageProtect)}] حماية الصورة\n5. [${status(s.nicknameProtect)}] حماية الألقاب\n6. [${status(s.antiJoin)}] منع الانضمام\n\n⇒ تفاعل بـ 👍 للاعتماد وتحديث البيانات الأصلية.`;
-
-  api.sendMessage(updatedMsg, threadID, (err, info) => {
-    global.client.handleReaction.push({ name: this.config.name, messageID: info.messageID, author: senderID });
-  }, messageID);
+    api.sendMessage("◜ تفاعل بـ 👍 لحفظ الاعدادات وأخذ لقطة حماية ◞", event.threadID, (err, info) => {
+        global.client.handleReaction.push({
+            name: this.config.name,
+            messageID: info.messageID,
+            author: event.senderID,
+            newSettings: settings
+        });
+    }, event.messageID);
 };
 
-module.exports.handleReaction = async function ({ api, event, handleReaction }) {
-  if (event.userID != handleReaction.author || event.reaction != "👍") return;
-  const { threadID } = event;
-  
-  let data = JSON.parse(fs.readFileSync(path));
-  const threadInfo = await api.getThreadInfo(threadID);
-  
-  // حفظ صورة المجموعة الحالية كمرجع للحماية
-  if (threadInfo.imageSrc) {
+module.exports.handleReaction = async ({ api, event, handleReaction }) => {
+    if (event.userID != handleReaction.author || event.reaction != "👍") return;
+    const { threadID } = event;
+    const botID = api.getCurrentUserID();
+    
     try {
-      const imgRes = await axios.get(threadInfo.imageSrc, { responseType: 'arraybuffer' });
-      const imgP = imagePath + `${threadID}.png`;
-      fs.writeFileSync(imgP, Buffer.from(imgRes.data, 'utf-8'));
-      data[threadID].imageLocalPath = imgP;
-    } catch (e) { console.log("خطأ في حفظ الصورة:", e) }
-  }
+        const threadInfo = await api.getThreadInfo(threadID);
+        const isAdmin = threadInfo.adminIDs.some(i => i.id == botID);
 
-  data[threadID].originalName = threadInfo.threadName || "";
-  fs.writeFileSync(path, JSON.stringify(data, null, 2));
+        if (!isAdmin) {
+            api.sendMessage("⚠️ تنبيه: البوت ليس ادمن! سيتم تجاهل (مكافحة الخروج، حماية الكنيات، والاسم) حتى ترفعني ادمن.", threadID);
+        }
 
-  api.unsendMessage(handleReaction.messageID);
-  const isBotAdmin = threadInfo.adminIDs.some(admin => admin.id == api.getCurrentUserID());
-  
-  if (!isBotAdmin) {
-    api.sendMessage("⚠️ تم الحفظ بنجاح، لكن يرجى رفع البوت مسؤولاً (Admin) لضمان عمل الحماية.", threadID);
-  } else {
-    api.sendMessage("✅ تم تفعيل أنظمة الحماية وتثبيت البيانات الأصلية بنجاح.", threadID);
-  }
+        handleReaction.newSettings.snapshot = {
+            name: threadInfo.threadName || "",
+            nicknames: threadInfo.nicknames || {}
+        };
+
+        let data = fs.readJsonSync(path);
+        data[threadID] = handleReaction.newSettings;
+        fs.writeJsonSync(path, data);
+        
+        api.unsendMessage(handleReaction.messageID);
+        return api.sendMessage(`◜ تم حفظ الاعدادات بنجاح ${isAdmin ? "✅" : "⚠️"} ◞`, threadID);
+    } catch (e) {
+        return api.sendMessage("❌ فشل النظام في الحفظ.", threadID);
+    }
 };
