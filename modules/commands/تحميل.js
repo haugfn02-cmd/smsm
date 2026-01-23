@@ -1,115 +1,100 @@
-const { nayanDownloader } = require("nayan-media-downloader");
 const axios = require("axios");
 const fs = require("fs-extra");
-const path = require("path");
+const { alldown } = require("rx-dawonload");
 
-module.exports.config = {
-  name: "تحميل",
-  version: "3.1.0",
-  hasPermssion: 0,
-  credits: "Kiros",
-  description: "تحميل احترافي مع عرض المعلومات",
-  commandCategory: "الوسائط",
-  usages: "تحميل [الرابط] [720|mp3]",
-  cooldowns: 5
-};
+module.exports = {
+  config: {
+    name: "تحميل",
+    version: "1.2.0",
+    hasPermssion: 0,
+    credits: "rX & YUMI",
+    description: "تحميل فيديوهات من اليوتيوب، تيك توك، إنستغرام، وفيسبوك عبر الرابط",
+    commandCategory: "الخدمات",
+    usages: "[الرابط]",
+    cooldowns: 5,
+  },
 
-module.exports.run = async ({ api, event, args }) => {
-  const { threadID, messageID } = event;
-
-  // ✅ لو كتب تحميل فقط
-  if (!args[0]) {
-    return api.sendMessage({
-      body:
-`「 𝑲𝑰𝑹𝑶𝑺 𝑫𝑶𝑾𝑵𝑳𝑶𝑨𝑫𝑬𝑹 」
-━━━━━━━━━━━━━
-📥 طريقة الاستخدام:
-
-➊ تحميل فيديو
-تحميل + الرابط
-
-➋ تحميل بجودة معينة
-تحميل + الرابط + 720
-
-➌ تحميل صوت فقط
-تحميل + الرابط + mp3
-
-━━━━━━━━━━━━━
-📌 المنصات المدعومة:
-🎬 يوتيوب
-📘 فيسبوك
-📸 إنستغرام
-🎵 تيك توك
-
-━━━━━━━━━━━━━
-⚡ مثال:
-تحميل https://youtu.be/xxxx 720
-━━━━━━━━━━━━━
-⚡ ʙʏ: 『⇄ 𝑩𝑶𝑻 𝑲𝑰𝑹𝑶𝑺 』`
-    }, threadID, messageID);
-  }
-
-  const url = args[0];
-  const option = args[1] || "auto";
-  const orderID = Math.floor(Math.random() * 90000) + 10000;
-
-  api.setMessageReaction("📥", messageID, () => {}, true);
-
-  try {
-    const res = await nayanDownloader(url);
-    if (!res || !res.data) throw new Error("فشل التحليل");
-
-    const info = res.data;
-
-    // تحديد المنصة
-    let platform = "UNKNOWN";
-    let icon = "🌐";
-
-    if (url.includes("facebook")) { platform = "FACEBOOK"; icon = "📘"; }
-    else if (url.includes("youtube") || url.includes("youtu.be")) { platform = "YOUTUBE"; icon = "🎬"; }
-    else if (url.includes("instagram")) { platform = "INSTAGRAM"; icon = "📸"; }
-    else if (url.includes("tiktok")) { platform = "TIKTOK"; icon = "🎵"; }
-
-    const title = info.title || "بدون عنوان";
-    const channel = info.author || info.channel || "غير معروف";
-    const duration = info.duration || "غير محددة";
-
-    let downloadUrl = info.url;
-
-    // خيار mp3
-    if (option.toLowerCase() === "mp3" && info.audio) {
-      downloadUrl = info.audio;
+  run: async function ({ api, event, args }) {
+    // التحقق من وجود رابط بعد كلمة تحميل
+    const content = args.join(" ");
+    if (!content || !content.startsWith("https://")) {
+      return api.sendMessage("❌ يرجى وضع رابط صحيح بعد كلمة 'تحميل'\nمثال: تحميل https://tiktok.com/...", event.threadID, event.messageID);
     }
 
-    const ext = option === "mp3" ? "mp3" : "mp4";
-    const filePath = path.join(__dirname, `/cache/kiros_${orderID}.${ext}`);
+    // معرف الطلب فريد لكل عملية
+    const requestId = event.messageID || Math.floor(Math.random() * 1000000);
+    const filePath = __dirname + "/cache/" + requestId + ".mp4";
 
-    const response = await axios.get(downloadUrl, { responseType: "arraybuffer" });
-    const sizeMB = (response.data.byteLength / (1024 * 1024)).toFixed(2);
+    try {
+      // تحديد المنصة بشكل مرئي
+      let site = "غير معروف";
+      const urlLower = content.toLowerCase();
+      if (urlLower.includes("youtube.com") || urlLower.includes("youtu.be")) site = "YouTube 📺";
+      else if (urlLower.includes("tiktok.com")) site = "TikTok 🎵";
+      else if (urlLower.includes("instagram.com")) site = "Instagram 📸";
+      else if (urlLower.includes("facebook.com") || urlLower.includes("fb.watch")) site = "Facebook 💙";
 
-    fs.writeFileSync(filePath, Buffer.from(response.data));
+      // تفاعل البحث
+      api.setMessageReaction("🔍", event.messageID, () => {}, true);
 
-    api.setMessageReaction("✅", messageID, () => {}, true);
+      // جلب بيانات الفيديو باستخدام المكتبة المثبتة
+      const data = await alldown(content);
+      
+      if (!data || !data.url) {
+        api.setMessageReaction("❌", event.messageID, () => {}, true);
+        return api.sendMessage("⚠️ عذراً، لم أتمكن من استخراج رابط الفيديو. قد يكون الحساب خاصاً أو الرابط غير مدعوم حالياً.", event.threadID, event.messageID);
+      }
 
-    return api.sendMessage({
-      body:
-`「 𝑲𝑰𝑹𝑶𝑺 𝑷𝑹𝑶 𝑫𝑶𝑾𝑵𝑳𝑶𝑨𝑫𝑬𝑹 」
-━━━━━━━━━━━━━
-🔗 اﻟﻤﻨﺼﺔ : ${icon} ${platform}
-📝 اﻟﻌﻨﻮان : ${title}
-👤 اﻟﻘﻨﺎﺓ : ${channel}
-⏱ اﻟﻤﺪﺓ : ${duration}
-📦 اﻟﺤﺠﻢ : ${sizeMB} MB
-⚙️ اﻟﻨﻮﻉ : ${ext.toUpperCase()}
-🆔 اﻟﻄﻠﺐ : #${orderID}
-━━━━━━━━━━━━━
-⚡ ʙʏ: 『⇄ 𝑩𝑶𝑻 𝑲𝑰𝑹𝑶𝑺 』`,
-      attachment: fs.createReadStream(filePath)
-    }, threadID, () => fs.unlinkSync(filePath), messageID);
+      const title = data.title || "فيديو بدون عنوان";
+      const videoUrl = data.url;
 
-  } catch (err) {
-    console.error(err);
-    api.setMessageReaction("❌", messageID, () => {}, true);
-    return api.sendMessage(`❌ فشل تحميل الطلب #${orderID}.`, threadID, messageID);
-  }
+      // تفاعل التحميل
+      api.setMessageReaction("⬇️", event.messageID, () => {}, true);
+
+      // تحميل الفيديو كبيانات Binary (Buffer)
+      const response = await axios.get(videoUrl, { responseType: "arraybuffer" });
+      
+      // التأكد من وجود مجلد cache قبل الحفظ
+      if (!fs.existsSync(__dirname + "/cache")) {
+        fs.mkdirSync(__dirname + "/cache", { recursive: true });
+      }
+
+      // حفظ الملف
+      fs.writeFileSync(filePath, Buffer.from(response.data));
+
+      // إرسال الرسالة بالستايل الأنيق الجديد
+      const stylishBody = 
+        `✅ تم التحميل بنجاح!\n` +
+        `━━━━━━━━━━━━━━━\n` +
+        `🆔 معرف الطلب: ${requestId}\n` +
+        `📍 المنصة: ${site}\n` +
+        `🎬 العنوان: ${title}\n` +
+        `━━━━━━━━━━━━━━━\n` +
+        `『 ⚙︎ ڪايࢪوس  ͡🦋͜  فالخدمة 』`;
+
+      api.sendMessage(
+        {
+          body: stylishBody,
+          attachment: fs.createReadStream(filePath),
+        },
+        event.threadID,
+        (err) => {
+          // تنظيف الملفات المؤقتة فور الإرسال
+          if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+          
+          if (!err) {
+            api.setMessageReaction("✅", event.messageID, () => {}, true);
+          } else {
+            api.setMessageReaction("❌", event.messageID, () => {}, true);
+          }
+        },
+        event.messageID
+      );
+
+    } catch (err) {
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      api.setMessageReaction("❌", event.messageID, () => {}, true);
+      api.sendMessage(`❌ حدث خطأ تقني:\n${err.message}`, event.threadID, event.messageID);
+    }
+  },
 };
