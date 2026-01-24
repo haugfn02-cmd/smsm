@@ -1,112 +1,93 @@
 module.exports.config = {
   name: "اوامر",
-  version: "10.1.0",
+  version: "1.0.6",
   hasPermssion: 0,
-  credits: "ᎠᎯᏁᎢᎬ ᏚᎮᎯᏒᎠᎯ",
-  description: "قائمة أوامر فاخرة لبوت ڪايࢪوس",
+  credits: "انس",
+  description: "قائمة الأوامر",
   commandCategory: "نظام",
-  usages: "[رقم الصفحة / اسم الأمر]",
-  cooldowns: 5
+  usages: "[رقم الصفحة]",
+  cooldowns: 5,
+  envConfig: {
+    autoUnsend: false
+  }
 };
 
 module.exports.languages = {
   "en": {
-    "moduleInfo": 
-`╭───〔 📖 معلومات الأمر 〕───╮
-│ ⊹ الاسم: %1
-│ ⊹ الوصف: %2
-│ ⊹ الاستخدام: %3
-│ ⊹ الفئة: %4
-│ ⊹ الانتظار: %5s
-│ ⊹ الصلاحية: %6
-╰──────────────╯
-⊹ المطور: %7`,
-    "user": "مستخدم",
-    "adminGroup": "مشرف",
-    "adminBot": "مطور"
+    "moduleInfo": "「 %1 」\n❯ Usage: %3\n❯ Category: %4\n❯ Waiting time: %5 seconds(s)\n❯ Permission: %6\n\n» Module code by %7 «",
+    "user": "User",
+    "adminGroup": "Admin group",
+    "adminBot": "Admin bot"
   }
 };
 
-module.exports.run = async function({ api, event, args, getText }) {
-  const axios = require("axios");
+module.exports.handleEvent = function ({ api, event, getText }) {
   const { commands } = global.client;
-  const { threadID, messageID } = event;
+  const { threadID, messageID, body } = event;
 
-  const imageUrl = "https://i.ibb.co/Vcsqzf4T/22ed4e077eadba33e9b9f78a64317ab9.jpg";
-  const command = commands.get((args[0] || "").toLowerCase());
+  if (!body || typeof body == "cmd" || body.indexOf("help") != 0) return;
+  const splitBody = body.slice(body.indexOf("help")).trim().split(/\s+/);
+  if (splitBody.length == 1 || !commands.has(splitBody[1].toLowerCase())) return;
+
   const threadSetting = global.data.threadData.get(parseInt(threadID)) || {};
-  const prefix = threadSetting.PREFIX || global.config.PREFIX;
-
-  if (!command) {
-    const categories = {};
-    for (let [name, value] of commands) {
-      if (value.config.hasPermssion == 2 || value.config.commandCategory?.toLowerCase() === "مطور") continue;
-      const cat = value.config.commandCategory || "أخرى";
-      if (!categories[cat]) categories[cat] = [];
-      categories[cat].push(name);
-    }
-
-    let sections = [];
-    for (let cat in categories) {
-      const cmds = categories[cat].sort();
-      let section = 
-`╭─〔 ✦ ${cat} 〕
-│ ${cmds.map(c => `⊹ ${c}`).join("   ")}
-╰────────────`;
-      sections.push(section);
-    }
-
-    const totalPages = 3;
-    const itemsPerPage = Math.ceil(sections.length / totalPages);
-    let page = parseInt(args[0]) || 1;
-    if (page < 1 || page > totalPages) page = 1;
-
-    const start = (page - 1) * itemsPerPage;
-    const displaySections = sections.slice(start, start + itemsPerPage).join("\n\n");
-
-    const msg = 
-`┌──────────────────────────┐
-   𓆩 𝗞𝗔𝗜𝗥𝗢𝗦 𝗖𝗢𝗠𝗠𝗔𝗡𝗗𝗦 𓆪
-└──────────────────────────┘
-
-${displaySections}
-
-╭────────────────────╮
-│ ⊹ عدد الأوامر: ${commands.size}
-│ ⊹ الصفحة: ${page} / 3
-│ ⊹ الرمز: ${prefix}
-╰────────────────────╯
-
-╭────────────────────╮
-│ 🤖 اسم البوت: ڪايࢪوس
-│ 👑 المطور: ᎠᎯᏁᎢᎬ ᏚᎮᎯᏒᎠᎯ
-│ 📖 استخدم: help اسم الأمر لعرض التفاصيل
-╰────────────────────╯`;
-
-    try {
-      const image = (await axios.get(imageUrl, { responseType: "stream" })).data;
-      return api.sendMessage({ body: msg, attachment: image }, threadID);
-    } catch (e) {
-      return api.sendMessage(msg, threadID);
-    }
-  }
+  const command = commands.get(splitBody[1].toLowerCase());
+  const prefix = (threadSetting.hasOwnProperty("PREFIX")) ? threadSetting.PREFIX : global.config.PREFIX;
 
   return api.sendMessage(
     getText(
       "moduleInfo",
       command.config.name,
-      command.config.description,
-      `${prefix}${command.config.name} ${(command.config.usages) ? command.config.usages : ""}`,
+      "",
+      `${prefix}${command.config.name}`,
       command.config.commandCategory,
       command.config.cooldowns,
-      (command.config.hasPermssion == 0)
+      ((command.config.hasPermssion == 0)
         ? getText("user")
         : (command.config.hasPermssion == 1)
         ? getText("adminGroup")
-        : getText("adminBot"),
+        : getText("adminBot")),
       command.config.credits
     ),
     threadID,
     messageID
   );
+};
+
+module.exports.run = function({ api, event, args }) {
+  const { commands } = global.client;
+  const { threadID, messageID } = event;
+  const threadSetting = global.data.threadData.get(parseInt(threadID)) || {};
+  const prefix = (threadSetting.hasOwnProperty("PREFIX")) ? threadSetting.PREFIX : global.config.PREFIX;
+
+  // فلترة أوامر المطور
+  const arrayInfo = Array.from(commands.values())
+    .filter(cmd => cmd.config.hasPermssion !== 2)
+    .map(cmd => cmd.config.name)
+    .sort();
+
+  const page = parseInt(args[0]) || 1;
+  const numberOfOnePage = 100;
+  const startSlice = numberOfOnePage * page - numberOfOnePage;
+  const returnArray = arrayInfo.slice(startSlice, startSlice + numberOfOnePage);
+
+  let msg = "╭─⋅⋅─☾─⋅⋅─╮\n";
+  msg += "  ◆ ◈ قائمة أوامر Kiros ◈ ◆\n";
+  msg += "╰─⋅⋅─☾─⋅⋅─╯\n\n";
+
+  // كل سطر 4 أوامر
+  for (let i = 0; i < returnArray.length; i += 4) {
+    msg += "│ " + returnArray.slice(i, i + 4).join(" • ") + "\n";
+  }
+
+  msg += "╰─────────⋅⋅\n\n";
+
+  msg += `╭─⋅⋅─☾─⋅⋅─╮
+ › إجمالي الأوامر: ${arrayInfo.length}
+ › الصفحة: ${page}/${Math.ceil(arrayInfo.length / numberOfOnePage)}
+ › اسم البوت: Kiros
+ › المطور: ᎠᎯᏁᎢᎬᏚᎮᎯᏒᎠᎯ
+ › استخدم: ${prefix}اوامر [رقم الصفحة]
+╰─⋅⋅─☾─⋅⋅─╯`;
+
+  return api.sendMessage(msg, threadID, messageID);
 };
