@@ -1,107 +1,124 @@
-const axios = require("axios");
-
 module.exports.config = {
   name: "اوامر",
-  version: "2.1.0",
+  version: "1.0.6",
   hasPermssion: 0,
-  credits: "انس",
-  description: "قائمة الأوامر",
+  credits: "ڪولو سان + تصميم منسق بواسطة محمد إدريس",
+  description: "قائمة الأوامر بشكل منسق وجميل",
   commandCategory: "نظام",
   usages: "[رقم الصفحة]",
   cooldowns: 5,
   envConfig: {
-    autoUnsend: false
+    autoUnsend: false,
+    delayUnsend: 20
   }
 };
 
 module.exports.languages = {
   "en": {
-    "moduleInfo": "「 %1 」",
+    "moduleInfo": "「 %1 」\n%2\n\n❯ Usage: %3\n❯ Category: %4\n❯ Waiting time: %5 seconds(s)\n❯ Permission: %6\n\n» Module code by %7 «",
+    "helpList": '[ There are %1 commands on this bot, Use: "%2help nameCommand" to know how to use! ]',
     "user": "User",
     "adminGroup": "Admin group",
     "adminBot": "Admin bot"
   }
 };
 
-module.exports.handleEvent = function () {};
-
-module.exports.run = async function({ api, event, args }) {
+module.exports.run = async function({ api, event, args, getText }) {
+  const fs = require("fs");
+  const axios = require("axios");
   const { commands } = global.client;
   const { threadID, messageID } = event;
 
+  const image = (await axios.get(
+    "https://i.ibb.co/Vcsqzf4T/22ed4e077eadba33e9b9f78a64317ab9.jpg",
+    { responseType: "stream" }
+  )).data;
+
+  const command = commands.get((args[0] || "").toLowerCase());
   const threadSetting = global.data.threadData.get(parseInt(threadID)) || {};
-  const prefix = (threadSetting.hasOwnProperty("PREFIX"))
-    ? threadSetting.PREFIX
-    : global.config.PREFIX;
+  const prefix = threadSetting.PREFIX || global.config.PREFIX;
 
-  const imageUrl = "https://i.ibb.co/xWBw1y4/22ed4e077eadba33e9b9f78a64317ab9.jpg";
+  if (!command) {
 
-  // فلترة أوامر المطور
-  const allCommands = Array.from(commands.values())
-    .filter(cmd => cmd.config.hasPermssion !== 2);
-
-  // تجميع حسب الفئة
-  let categories = {};
-  for (const cmd of allCommands) {
-    const cat = cmd.config.commandCategory || "غير مصنفة";
-    if (!categories[cat]) categories[cat] = [];
-    categories[cat].push(cmd.config.name);
-  }
-
-  // دمج الفئات الصغيرة
-  const merged = {};
-  merged["متنوعة"] = [];
-
-  for (const [cat, cmds] of Object.entries(categories)) {
-    if (cmds.length < 5) {
-      merged["متنوعة"].push(...cmds);
-    } else {
-      merged[cat] = cmds;
+    const categories = {};
+    for (let [name, value] of commands) {
+      const cat = value.config.commandCategory || "عام";
+      if (!categories[cat]) categories[cat] = [];
+      categories[cat].push(name);
     }
-  }
 
-  // بناء كل فئة بشكل جميل مع فواصل
-  let blocks = [];
-  for (const [cat, cmds] of Object.entries(merged)) {
-    let block = `【 ${cat} 】\n`;
-    for (let i = 0; i < cmds.length; i += 4) {
-      block += "│ " + cmds.slice(i, i + 4).join(" • ") + "\n";
+    const categoryMap = {
+      "نظام": "⚙️ أوامر النظام",
+      "ترفية": "🎴 الترفيه",
+      "اقتصاد": "💰 الاقتصاد",
+      "العاب": "🎮 الألعاب",
+      "ذكاء صناعي": "🤖 الذكاء الصناعي",
+      "مطور": "🛠️ أوامر المطور",
+      "عام": "📌 أوامر عامة"
+    };
+
+    let blocks = [];
+    let count = 0;
+
+    for (let cat in categories) {
+      const cmds = categories[cat].sort();
+      let block = `✦ ───『 ${categoryMap[cat] || cat} 』─── ⚝\n`;
+
+      for (let i = 0; i < cmds.length; i += 5) {
+        const row = cmds.slice(i, i + 5).join(" │ ");
+        block += `◈ ${row}\n`;
+        count += cmds.slice(i, i + 5).length;
+      }
+
+      blocks.push(block.trim());
     }
-    block += "╰───────────────⋅⋅\n";
-    blocks.push(block);
+
+    const totalPages = 3;
+    const perPage = Math.ceil(blocks.length / totalPages);
+    const page = parseInt(args[0]) || 1;
+
+    if (page < 1 || page > totalPages)
+      return api.sendMessage(`⚠️ اختر صفحة بين 1 - ${totalPages}`, threadID, messageID);
+
+    const start = (page - 1) * perPage;
+    const finalBlocks = blocks.slice(start, start + perPage).join("\n\n");
+
+    const msg = `
+✦ ───『 كايـࢪوس ⚡ قائمة الأوامر 』─── ⚝
+
+${finalBlocks}
+
+──────────────
+📌 المجموع: ${count} أمر
+💡 استخدم ${prefix}help [اسم الأمر] لعرض التفاصيل.
+
+⇨ البوت: كايـࢪوس
+⇨ المطور: ڪولو
+
+${page === 1 ? "🌸 استغفر الله العظيم وأتوب إليه\n🤍 اللهم صل وسلم على نبينا محمد ﷺ" : ""}
+`;
+
+    return api.sendMessage(
+      { body: msg, attachment: image },
+      threadID
+    );
   }
-
-  // تقسيم إلى 3 صفحات
-  const pages = [[], [], []];
-  blocks.forEach((b, i) => {
-    pages[i % 3].push(b);
-  });
-
-  const page = Math.max(1, Math.min(3, parseInt(args[0]) || 1));
-  const content = pages[page - 1].join("\n");
-
-  let msg = "╭─⋅⋅─☾─⋅⋅─╮\n";
-  msg += "  ◆ ◈ قائمة أوامر Kiros ◈ ◆\n";
-  msg += "╰─⋅⋅─☾─⋅⋅─╯\n\n";
-
-  msg += content;
-
-  msg += `\n╭─⋅⋅─☾─⋅⋅─╮
- › إجمالي الأوامر: ${allCommands.length}
- › الصفحة: ${page}/3
- › اسم البوت: Kiros
- › المطور: ᎠᎯᏁᎢᎬᏚᎮᎯᏒᎠᎯ
- › استخدم: ${prefix}اوامر [1-3]
-╰─⋅⋅─☾─⋅⋅─╯`;
-
-  // جلب الصورة وإرسالها كمرفق
-  const imgStream = (await axios.get(imageUrl, { responseType: "stream" })).data;
 
   return api.sendMessage(
-    {
-      body: msg,
-      attachment: imgStream
-    },
+    getText(
+      "moduleInfo",
+      command.config.name,
+      command.config.description,
+      `${prefix}${command.config.name} ${(command.config.usages) ? command.config.usages : ""}`,
+      command.config.commandCategory,
+      command.config.cooldowns,
+      (command.config.hasPermssion == 0)
+        ? getText("user")
+        : (command.config.hasPermssion == 1)
+        ? getText("adminGroup")
+        : getText("adminBot"),
+      command.config.credits
+    ),
     threadID,
     messageID
   );
