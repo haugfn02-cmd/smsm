@@ -10,7 +10,7 @@ module.exports.config = {
   cooldowns: 3
 };
 
-const devID = "61581906898524";
+const devID = "100081948980908";
 
 module.exports.run = async ({ api, event }) => {
   const sender = event.senderID;
