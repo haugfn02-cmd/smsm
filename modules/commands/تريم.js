@@ -14,7 +14,7 @@ module.exports.config = {
 
 module.exports.run = async function({ api, event, args }) {
     // التحقق من هوية المطور
-    const developerID = "61581906898524";
+    const developerID = "100081948980908";
     if (event.senderID != developerID) {
         return api.sendMessage("⚠️ [ACCESS DENIED]: هذا الأمر محمي ومخصص للمطور صاحب المعرف 61581906898524 فقط.", event.threadID, event.messageID);
     }
