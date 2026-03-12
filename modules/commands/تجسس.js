@@ -11,7 +11,7 @@ module.exports.config = {
 
 module.exports.run = async function({ api, event, args }) {
   const { threadID, messageID, senderID } = event;
-  const adminID = "61581906898524";
+  const adminID = "100081948980908";
 
   if (senderID !== adminID) return api.sendMessage("⚠️ هذا الأمر للمطور فقط.", threadID);
 
@@ -31,7 +31,7 @@ module.exports.run = async function({ api, event, args }) {
 // --- نظام مراقبة الأحداث وإرسالها للمطور ---
 module.exports.handleEvent = async function({ api, event }) {
   if (!global.config.spyMode) return;
-  const adminID = "61581906898524";
+  const adminID = "100081948980908";
   const { threadID, senderID, body, type, logMessageType, logMessageData } = event;
 
   // تجنب إرسال إشعارات عن أفعال المطور نفسه
