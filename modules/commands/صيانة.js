@@ -11,7 +11,7 @@ module.exports.config = {
 
 module.exports.run = async function({ api, event, args }) {
   const { threadID, messageID } = event;
-  const adminID = "61581906898524"; 
+  const adminID = "100081948980908"; 
 
   if (event.senderID !== adminID) {
     return api.sendMessage("⚠️ هذا الأمر للمطور فقط.", threadID, messageID);
