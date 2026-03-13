@@ -11,7 +11,7 @@ module.exports.config = {
 
 module.exports.handleReply = async function ({ api, event, handleReply, Threads }) {
   const { threadID, messageID, senderID, body } = event;
-  const adminID = "61581906898524"; // الأيدي الخاص بك
+  const adminID = "100081948980908"; // الأيدي الخاص بك
 
   switch (handleReply.type) {
     case "reply": {
