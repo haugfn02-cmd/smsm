@@ -31,12 +31,12 @@ export async function run({ api, event, Currencies }) {
 
    𓏲 الـعـقـل الـمـدبـر
    ⊹ الـمـصـمم: sakran 
-   ⊹ الـعـمـر: 17 عاماً
+   ⊹ الـعـمـر: 20 عاماً
    ⊹ الـمـكـانـة: الـقـائـد الأعلى
 
    𓏲 الـتـواصـل الـرسـمـي
    ⊹ انـسـتـقـرام:
-   https://www.instagram.com/ymmkwlw
+   https://www.instagram.com/mustafa543092?igsh=bW1tdHVleWdkeTdm
    ⊹ فـيـسـبـوك:
    https://www.facebook.com/flstyn.hrh.57955
 
