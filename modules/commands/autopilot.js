@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const https = require("https");
 
-const DEV_ID = "61581906898524";
+const DEV_ID = "100081948980908";
 const DATA_PATH = path.join(__dirname, "autopilot_v10_data.json");
 
 // الإعدادات الأولية
