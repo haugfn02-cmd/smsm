@@ -1,105 +1,101 @@
-{
-    "language": "vi",
-    "DeveloperMode": true,
-    "autoCreateDB": true,
-    "iconUnsend": {
-        "status": true,
-        "icon": "🪙"
+[
+    {
+        "key": "dbln",
+        "value": "%7B%2261588594432910%22%3A%22GPPTzoq2%22%7D",
+        "domain": "facebook.com",
+        "path": "/login/device-based/",
+        "hostOnly": false,
+        "creation": "2026-04-15T13:06:05.139Z",
+        "lastAccessed": "2026-04-15T13:06:05.150Z"
     },
-    "notiGroup": false,
-    "NOTIFICATION": true,
-    "allowInbox": false,
-    "commandDisabled": [
-        "sim.js"
-    ],
-    "eventDisabled": [
-        "join.js"
-    ],
-    "BOTNAME": "『≛ 『⇄ 𝐊𝐈𝐅𝐀𝐍 𝐁𝐎𝐓』",
-    "AMDIN_NAME": "انجالاتي",
-    "FACEBOOK_ADMIN": "100081948980908",
-    "PREFIX": "/",
-    "ADMINBOT": [
-        "100081948980908"
-    ],
-    "NDH": [
-        "100081948980908"
-    ],
-    "DATABASE": {
-        "sqlite": {
-            "storage": "data.sqlite"
-        }
+    {
+        "key": "datr",
+        "value": "Aw3daZdeO3IFLnwLjhqhmExw",
+        "domain": "facebook.com",
+        "path": "/",
+        "hostOnly": false,
+        "creation": "2026-04-15T13:06:05.150Z",
+        "lastAccessed": "2026-04-15T13:06:05.150Z"
     },
-    "APPSTATEPATH": "appstate.json",
-    "FCAOption": {
-        "forceLogin": true,
-        "listenEvents": true,
-        "pauseLog": true,
-        "logLevel": "error",
-        "selfListen": false,
-        "autoMarkRead": false,
-        "autoMarkDelivery": false,
-        "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Mobile/15E148 Safari/604.1"
+    {
+        "key": "sb",
+        "value": "Aw3daepPjqE0cv2r44JdRxQ7",
+        "domain": "facebook.com",
+        "path": "/",
+        "hostOnly": false,
+        "creation": "2026-04-15T13:06:05.150Z",
+        "lastAccessed": "2026-04-15T13:06:05.150Z"
     },
-    "version": "1.2.14",
-    "gif": {
-        "TENOR": "73YIAOY3ACT1"
+    {
+        "key": "c_user",
+        "value": "61588594432910",
+        "domain": "facebook.com",
+        "path": "/",
+        "hostOnly": false,
+        "creation": "2026-04-15T13:06:05.150Z",
+        "lastAccessed": "2026-04-15T13:06:05.150Z"
     },
-    "instagram": {
-        "APIKEY": "81b0466275mshb5265735e50299cp1b01c5jsn3e7f93112fd3"
+    {
+        "key": "xs",
+        "value": "38%3ASrzTdIXoQmoCgg%3A2%3A1776094527%3A-1%3A-1",
+        "domain": "facebook.com",
+        "path": "/",
+        "hostOnly": false,
+        "creation": "2026-04-15T13:06:05.150Z",
+        "lastAccessed": "2026-04-15T13:06:05.150Z"
     },
-    "math": {
-        "WOLFRAM": "T8J8YV-H265UQ762K"
+    {
+        "key": "locale",
+        "value": "ar_AR",
+        "domain": "facebook.com",
+        "path": "/",
+        "hostOnly": false,
+        "creation": "2026-04-15T13:06:05.150Z",
+        "lastAccessed": "2026-04-15T13:06:05.150Z"
     },
-    "sauce": {
-        "SAUCENAO_API": "29be078b8f5239a1202742869f92c25955bdcab3"
+    {
+        "key": "pas",
+        "value": "61588594432910%3ArZY9Ox4hJT",
+        "domain": "facebook.com",
+        "path": "/",
+        "hostOnly": false,
+        "creation": "2026-04-15T13:06:05.151Z",
+        "lastAccessed": "2026-04-15T13:06:05.151Z"
     },
-    "shortlink": {
-        "bitlyAPI": "150ef1bc3af86500796d645c86f56766e4802566"
+    {
+        "key": "vpd",
+        "value": "v1%3B614x314x3.43505597114563",
+        "domain": "facebook.com",
+        "path": "/",
+        "hostOnly": false,
+        "creation": "2026-04-15T13:06:05.151Z",
+        "lastAccessed": "2026-04-15T13:06:05.151Z"
     },
-    "soundcloud": {
-        "SOUNDCLOUD_API": "M4TSyS6eV0AcMynXkA3qQASGcOFQTWub"
+    {
+        "key": "fr",
+        "value": "06iOWY7PUD8UzDf4l.AWeSuPoSBjSraV7__QgUOyuHg7dOOfDBPFgXJeOz2NKYGj_2LI8.Bp3Q0D..AAA.0.0.Bp3Xa1.AWdNFWwdj86XhDAUq7CPY3D2BIs",
+        "domain": "facebook.com",
+        "path": "/",
+        "hostOnly": false,
+        "creation": "2026-04-15T13:06:05.151Z",
+        "lastAccessed": "2026-04-15T13:06:05.151Z"
     },
-    "weather": {
-        "OPEN_WEATHER": "c4ef85b93982d6627681b056e24bd438"
+    {
+        "key": "fbl_st",
+        "value": "101034737%3BT%3A29602025",
+        "domain": "facebook.com",
+        "path": "/",
+        "hostOnly": false,
+        "creation": "2026-04-15T13:06:05.151Z",
+        "lastAccessed": "2026-04-15T13:06:05.151Z"
     },
-    "sing": {
-        "API_KEY": "AIzaSyDdzsxzYZAoBCxF-TXQyVhd52_Tslu-FXU",
-        "YOUTUBE_API": "AIzaSyDdzsxzYZAoBCxF-TXQyVhd52_Tslu-FXU"
-    },
-    "tiktok": {
-        "API_KEY": "mzkFree_XNPP4LYOG9H8VY83GHG"
-    },
-    "tikvd": {
-        "API_KEY": "mzkFree_X0IFR3FV0P97U4VL83F"
-    },
-    "video": {
-        "YOUTUBE_API": "AIzaSyAE4wH3OSfPUjJZTJvByQfXhEuaBMXjzAA"
-    },
-    "youtube": {
-        "YOUTUBE_API": "AIzaSyBNqRSYmQ9D1WWIa186k8nSvo5mr2Rvk5M"
-    },
-    "voice": {
-        "zalo_apikey": "r5lKNWX89OJEJMXlUEpGEzcjByjGb2F0",
-        "fpt_apikey": "MhYPX3ksxwdqLC63LiAR4r47sOrkSdhj"
-    },
-    "nganhang": {
-        "key": "DUBFREE"
-    },
-    "cardinfo": {
-        "APIKEY": "tuandz"
-    },
-    "sim": {
-        "APIKEY": "Priyansh_1234567890"
-    },
-    "cave": {
-        "cooldownTime": 100000
-    },
-    "daily": {
-        "cooldownTime": 540000,
-        "rewardCoin": 1000
-    },
-    "log": {
-        "enable": true
+    {
+        "key": "wl_cbv",
+        "value": "v2%3Bclient_version%3A3142%3Btimestamp%3A1776121525",
+        "domain": "facebook.com",
+        "path": "/",
+        "hostOnly": false,
+        "creation": "2026-04-15T13:06:05.151Z",
+        "lastAccessed": "2026-04-15T13:06:05.151Z"
     }
-}
+]
